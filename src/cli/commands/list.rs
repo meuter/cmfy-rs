@@ -1,7 +1,23 @@
+use super::Run;
+use clap::Args;
+
 use cmfy::{History, Prompt, Queue};
 use colored::Colorize;
 use itertools::Itertools;
 use std::{fmt::Display, iter::empty};
+
+/// List all aprompts from history and queue
+#[derive(Debug, Args)]
+pub struct List {}
+
+impl Run for List {
+    async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
+        let history = client.history().await?;
+        let queue = client.queue().await?;
+        PromptList::from((history, queue)).display();
+        Ok(())
+    }
+}
 
 enum Status {
     Completed,

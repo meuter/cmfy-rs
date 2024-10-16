@@ -1,10 +1,8 @@
-mod list;
+mod commands;
 
 use clap::{Parser, Subcommand};
-use cmfy::Client;
-use humansize::{make_format, BINARY};
-use list::PromptList;
-use std::error::Error;
+use cmfy::{Client, Result};
+use commands::{Get, History, List, Queue, Run, Stats};
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -25,91 +23,29 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Command {
-    /// Displays basic statistics about the server.
-    Stats,
+    Stats(Stats),
+    History(History),
+    Queue(Queue),
+    List(List),
+    Get(Get),
+}
 
-    /// Lists prompts from history
-    History {
-        /// Clears all prompt from history after printing
-        #[clap(long, short, action, default_value_t = false)]
-        clear: bool,
-    },
-
-    /// Lists prompts from queue
-    Queue {
-        /// Clears all pending prompts from the queue after printing
-        #[clap(long, short, action, default_value_t = false)]
-        clear: bool,
-    },
-
-    /// List all aprompts from history and queue
-    List,
-
-    /// Display GET request raw json output.
-    Get {
-        /// the route, e.g. "/history"
-        route: String,
-    },
+impl Run for Command {
+    async fn run(self, client: Client) -> Result<()> {
+        use Command::*;
+        match self {
+            Stats(stats) => stats.run(client).await,
+            History(history) => history.run(client).await,
+            Queue(queue) => queue.run(client).await,
+            List(list) => list.run(client).await,
+            Get(get) => get.run(client).await,
+        }
+    }
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    use Command::*;
-
+async fn main() -> Result<()> {
     let args = Cli::parse();
     let client = Client::new(args.server, args.port);
-
-    match args.command {
-        Stats => {
-            let stats = client.system_stats().await?;
-            println!("versions:");
-            println!(
-                "    python  : {}",
-                stats
-                    .system
-                    .python_version
-                    .split_whitespace()
-                    .next()
-                    .expect("malfored python version")
-            );
-            println!("    comfyui : {}", stats.system.comfyui_version);
-            println!("    pytorch : {}", stats.system.pytorch_version);
-            println!("devices:");
-            let format_size = make_format(BINARY);
-            for device in &stats.devices {
-                println!(
-                    "    {} ({}/{})",
-                    device.name,
-                    format_size(device.vram_free),
-                    format_size(device.vram_total),
-                );
-            }
-        }
-        History { clear } => {
-            let history = client.history().await?;
-            PromptList::from(history).display();
-            if clear {
-                let payload = serde_json::json!({"clear":true});
-                client.post("history", &payload).await?;
-            }
-        }
-        Queue { clear } => {
-            let queue = client.queue().await?;
-            PromptList::from(queue).display();
-            if clear {
-                let payload = serde_json::json!({"clear":true});
-                client.post("queue", &payload).await?;
-            }
-        }
-        List => {
-            let history = client.history().await?;
-            let queue = client.queue().await?;
-            PromptList::from((history, queue)).display();
-        }
-        Get { route } => {
-            let response: serde_json::Value = client.get(route).await?;
-            serde_json::to_writer(std::io::stdout(), &response)?;
-        }
-    }
-    Ok(())
+    args.command.run(client).await
 }
