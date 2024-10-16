@@ -1,10 +1,10 @@
 [![Build](https://github.com/meuter/cmfy-rs/actions/workflows/build.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/build.yml)
 [![Clippy](https://github.com/meuter/cmfy-rs/actions/workflows/clippy.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/clippy.yml)
 
-[![Crates.io](https://img.shields.io/crates/v/cmfy-rs)](https://crates.io/crates/cmfy-rs)
-[![Docs.rs](https://docs.rs/cmfy-rs/badge.svg)](https://docs.rs/cmfy-rs)
-[![Crates.io](https://img.shields.io/crates/d/cmfy-rs)](https://crates.io/crates/cmfy-rs)
-[![Crates.io](https://img.shields.io/crates/l/cmfy-rs)](https://github.com/meuter/cmfy-rs-rs/blob/main/LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/cmfy)](https://crates.io/crates/cmfy)
+[![Docs.rs](https://docs.rs/cmfy/badge.svg)](https://docs.rs/cmfy)
+[![Crates.io](https://img.shields.io/crates/d/cmfy)](https://crates.io/crates/cmfy)
+[![Crates.io](https://img.shields.io/crates/l/cmfy)](https://github.com/meuter/cmfy/blob/main/LICENSE)
 
 # cmfy
 
