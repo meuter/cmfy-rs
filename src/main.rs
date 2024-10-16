@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match args.command {
         Stats => {
-            let stats: dto::SystemStats = client.get("system_stats").await?;
+            let stats = client.system_stats().await?;
             println!("versions:");
             println!(
                 "    python  : {}",
@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("{:#?}", response);
         }
         History => {
-            let history: dto::History = client.get("history").await?;
+            let history = client.history().await?;
             println!("{:#?}", history);
         }
         Queue => {

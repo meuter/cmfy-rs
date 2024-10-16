@@ -1,6 +1,6 @@
 use serde::de::DeserializeOwned;
 
-use crate::error::Result;
+use crate::{dto, error::Result};
 
 pub struct Client {
     client: reqwest::Client,
@@ -21,5 +21,13 @@ impl Client {
         let body = response.error_for_status()?.bytes().await?;
         let parsed = serde_json::from_slice(&body)?;
         Ok(parsed)
+    }
+
+    pub async fn system_stats(&self) -> Result<dto::SystemStats> {
+        self.get("system_stats").await
+    }
+
+    pub async fn history(&self) -> Result<dto::History> {
+        self.get("history").await
     }
 }
