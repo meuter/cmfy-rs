@@ -1,0 +1,15 @@
+name: Clippy
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings" # Make sure CI fails on all warnings, including Clippy lints
+
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features --tests
