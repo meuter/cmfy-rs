@@ -30,6 +30,12 @@ enum Command {
     /// Displays basic statistics about the server.
     Stats,
 
+    /// Lists prompts from history
+    History,
+
+    /// Lists prompts from queue
+    Queue,
+
     /// Display GET request raw json output.
     Get {
         /// the route, e.g. "/history"
@@ -73,6 +79,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Get { route } => {
             let response: serde_json::Value = client.get(route).await?;
             println!("{:#?}", response);
+        }
+        History => {
+            let history: serde_json::Value = client.get("history").await?;
+            println!("{:#?}", history);
+        }
+        Queue => {
+            let queue: serde_json::Value = client.get("queue").await?;
+            println!("{:#?}", queue);
         }
     }
     Ok(())
