@@ -2,6 +2,7 @@ use cmfy::{Error, Result};
 use serde::Serialize;
 use std::{
     ffi::OsString,
+    fmt::Display,
     fs::File,
     io::{stdout, Write},
     path::PathBuf,
@@ -9,6 +10,16 @@ use std::{
 
 #[derive(Clone, Debug, Default)]
 pub struct Output(Option<PathBuf>);
+
+impl Display for Output {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(path) = &self.0 {
+            write!(f, "{}", path.display())
+        } else {
+            write!(f, "<stdout>")
+        }
+    }
+}
 
 impl From<OsString> for Output {
     fn from(value: OsString) -> Self {

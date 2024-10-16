@@ -10,6 +10,16 @@ use std::{
 #[derive(Clone, Debug, Default)]
 pub struct Input(Option<PathBuf>);
 
+impl ToString for Input {
+    fn to_string(&self) -> String {
+        if let Some(path) = &self.0 {
+            path.display().to_string()
+        } else {
+            "<stdin>".into()
+        }
+    }
+}
+
 impl From<OsString> for Input {
     fn from(value: OsString) -> Self {
         Self(Some(PathBuf::from(value)))

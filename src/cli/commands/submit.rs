@@ -11,7 +11,7 @@ use colored::Colorize;
 #[derive(Debug, Args)]
 pub struct Submit {
     /// Input file containing the prompts in json format
-    /// (if omitted, reads from standard input)
+    #[clap(default_value_t=Input::default())]
     input: Input,
 }
 

@@ -15,8 +15,7 @@ pub struct Get {
     route: String,
 
     /// Output path to store the captured prompt(s).
-    /// (if omitted, writes to standard output)
-    #[clap(long, short)]
+    #[clap(long, short, default_value_t = Output::default())]
     output: Output,
 
     /// Pretty prints the JSON output
