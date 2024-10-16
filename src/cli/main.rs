@@ -1,8 +1,10 @@
+mod list;
+
 use clap::{Parser, Subcommand};
-use cmfy::{Client, Prompt};
+use cmfy::Client;
 use humansize::{make_format, BINARY};
-use itertools::Itertools;
-use std::{error::Error, iter::empty};
+use list::PromptList;
+use std::error::Error;
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -37,11 +39,6 @@ enum Command {
         /// the route, e.g. "/history"
         route: String,
     },
-}
-
-struct PromptListEntry {
-    prompt: Prompt,
-    status: &'static str,
 }
 
 #[tokio::main]
@@ -83,39 +80,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         History => {
             let history = client.history().await?;
-            let mut entries = history
-                .into_values()
-                .map(|entry| {
-                    let status = if entry.cancelled() { "cancelled" } else { "completed" };
-                    let prompt = entry.prompt;
-                    PromptListEntry { prompt, status }
-                })
-                .collect_vec();
-            entries.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
-            for entry in entries {
-                let prompt = entry.prompt;
-                let index = format!("[{}]", prompt.index);
-                println!("{:<5}{} ({})", index, prompt.uuid, entry.status);
-            }
+            PromptList::from(history).display()
         }
         Queue => {
             let queue = client.queue().await?;
-            let mut entries = empty()
-                .chain(queue.running.into_iter().map(|prompt| PromptListEntry {
-                    prompt,
-                    status: "running",
-                }))
-                .chain(queue.pending.into_iter().map(|prompt| PromptListEntry {
-                    prompt,
-                    status: "pending",
-                }))
-                .collect_vec();
-            entries.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
-            for entry in entries {
-                let prompt = entry.prompt;
-                let index = format!("[{}]", prompt.index);
-                println!("{:<5}{} ({})", index, prompt.uuid, entry.status);
-            }
+            PromptList::from(queue).display()
         }
     }
     Ok(())
