@@ -1,3 +1,4 @@
+use reqwest::Url;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use crate::{dto::{self, PromptNodes}, error::Result};
 
@@ -12,6 +13,12 @@ impl Client {
         let server = server.as_ref().to_string();
         let client = reqwest::Client::new();
         Self { client, server, port }
+    }
+
+    pub fn base_url(&self) -> Result<Url> {
+        let address =format!("http://{}:{}", self.server, self.port);
+        let url = Url::parse(address.as_str())?;
+        Ok(url)
     }
 
     pub async fn get<R: DeserializeOwned>(&self, route: impl AsRef<str>) -> Result<R> {
