@@ -1,37 +1,36 @@
 use cmfy::{Error, Result};
 use serde::de::DeserializeOwned;
-use std::{fs::File, io::Read, path::PathBuf};
+use std::{
+    ffi::OsString,
+    fs::File,
+    io::{stdin, Read},
+    path::PathBuf,
+};
 
-pub struct Input(Box<dyn Read>);
+#[derive(Clone, Debug, Default)]
+pub struct Input(Option<PathBuf>);
 
-impl Default for Input {
-    fn default() -> Self {
-        Self(Box::new(std::io::stdin()))
+impl From<OsString> for Input {
+    fn from(value: OsString) -> Self {
+        Self(Some(PathBuf::from(value)))
     }
 }
 
-impl TryFrom<PathBuf> for Input {
+impl TryInto<Box<dyn Read>> for Input {
     type Error = Error;
 
-    fn try_from(path: PathBuf) -> Result<Self> {
-        Ok(Self(Box::new(File::open(path)?)))
-    }
-}
-
-impl TryFrom<Option<PathBuf>> for Input {
-    type Error = Error;
-
-    fn try_from(maybe_path: Option<PathBuf>) -> Result<Self> {
-        if let Some(path) = maybe_path {
-            Self::try_from(path)
+    fn try_into(self) -> Result<Box<dyn Read>> {
+        if let Some(path) = self.0 {
+            Ok(Box::new(File::open(path)?))
         } else {
-            Ok(Self::default())
+            Ok(Box::new(stdin()))
         }
     }
 }
 
 impl Input {
     pub fn read_json<T: DeserializeOwned>(self) -> Result<T> {
-        Ok(serde_json::from_reader(self.0)?)
+        let reader: Box<dyn Read> = self.try_into()?;
+        Ok(serde_json::from_reader(reader)?)
     }
 }

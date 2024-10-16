@@ -1,10 +1,7 @@
+use super::{list::PromptList, Run};
+use crate::io::Output;
 use clap::Args;
 use itertools::Itertools;
-use std::path::PathBuf;
-
-use crate::io::Output;
-
-use super::{list::PromptList, Run};
 
 /// Capture running and pending prompt to file.
 ///
@@ -18,7 +15,7 @@ pub struct Capture {
     queue: bool,
 
     /// Capture all prompts from history (completed and cancelled)
-    #[clap(long, short='s', action, default_value_t = false)]
+    #[clap(long, short = 's', action, default_value_t = false)]
     history: bool,
 
     /// Capture all promts from both queue and history
@@ -27,8 +24,8 @@ pub struct Capture {
 
     /// Output path to store the captured prompt(s).
     /// (if omitted, writes to standard output)
-    #[clap(long, short, verbatim_doc_comment)]
-    output: Option<PathBuf>,
+    #[clap(long, short)]
+    output: Output,
 
     /// Pretty prints the JSON output
     #[clap(long, action, default_value_t = false)]
@@ -59,8 +56,7 @@ impl Run for Capture {
         //       output nodes. The goal of capturing the prompts is to submit them for which
         //       we do not need the submit information. We just need the prompt nodes.
         let prompts = list.into_prompts().map(|prompt| prompt.nodes).collect_vec();
-        let output = Output::try_from(self.output)?;
+        let output = Output::from(self.output);
         output.write_json(&prompts, self.pretty)
-
     }
 }

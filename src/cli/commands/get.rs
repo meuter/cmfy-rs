@@ -1,7 +1,6 @@
-use std::path::PathBuf;
 use super::Run;
-use clap::Args;
 use crate::io::Output;
+use clap::Args;
 
 /// Display GET request raw json output.
 ///
@@ -17,8 +16,8 @@ pub struct Get {
 
     /// Output path to store the captured prompt(s).
     /// (if omitted, writes to standard output)
-    #[clap(long, short, verbatim_doc_comment)]
-    output: Option<PathBuf>,
+    #[clap(long, short)]
+    output: Output,
 
     /// Pretty prints the JSON output
     #[clap(long, short, action, default_value_t = false)]
@@ -28,7 +27,6 @@ pub struct Get {
 impl Run for Get {
     async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
         let response: serde_json::Value = client.get(self.route).await?;
-        let output = Output::try_from(self.output)?;
-        output.write_json(&response, self.pretty)
+        self.output.write_json(&response, self.pretty)
     }
 }

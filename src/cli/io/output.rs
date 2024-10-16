@@ -1,41 +1,40 @@
 use cmfy::{Error, Result};
 use serde::Serialize;
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{
+    ffi::OsString,
+    fs::File,
+    io::{stdout, Write},
+    path::PathBuf,
+};
 
-pub struct Output(Box<dyn Write>);
+#[derive(Clone, Debug, Default)]
+pub struct Output(Option<PathBuf>);
 
-impl Default for Output {
-    fn default() -> Self {
-        Self(Box::new(std::io::stdout()))
+impl From<OsString> for Output {
+    fn from(value: OsString) -> Self {
+        Self(Some(PathBuf::from(value)))
     }
 }
 
-impl TryFrom<PathBuf> for Output {
+impl TryInto<Box<dyn Write>> for Output {
     type Error = Error;
 
-    fn try_from(path: PathBuf) -> Result<Self> {
-        Ok(Self(Box::new(File::create(path)?)))
-    }
-}
-
-impl TryFrom<Option<PathBuf>> for Output {
-    type Error = Error;
-
-    fn try_from(maybe_path: Option<PathBuf>) -> Result<Self> {
-        if let Some(path) = maybe_path {
-            Self::try_from(path)
+    fn try_into(self) -> Result<Box<dyn Write>> {
+        if let Some(path) = self.0 {
+            Ok(Box::new(File::create(path)?))
         } else {
-            Ok(Self::default())
+            Ok(Box::new(stdout()))
         }
     }
 }
 
 impl Output {
     pub fn write_json(self, value: &impl Serialize, pretty: bool) -> Result<()> {
+        let writer: Box<dyn Write> = self.try_into()?;
         if pretty {
-            Ok(serde_json::to_writer_pretty(self.0, &value)?)
+            Ok(serde_json::to_writer_pretty(writer, &value)?)
         } else {
-            Ok(serde_json::to_writer(self.0, &value)?)
+            Ok(serde_json::to_writer(writer, &value)?)
         }
     }
 }
