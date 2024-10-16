@@ -4,7 +4,6 @@ mod error;
 
 use clap::{Parser, Subcommand};
 use client::Client;
-use dto::SystemStats;
 use humansize::{make_format, BINARY};
 use std::error::Error;
 
@@ -52,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match args.command {
         Stats => {
-            let stats: SystemStats = client.get("system_stats").await?;
+            let stats: dto::SystemStats = client.get("system_stats").await?;
             println!("versions:");
             println!(
                 "    python  : {}",
@@ -81,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("{:#?}", response);
         }
         History => {
-            let history: serde_json::Value = client.get("history").await?;
+            let history: dto::History = client.get("history").await?;
             println!("{:#?}", history);
         }
         Queue => {
