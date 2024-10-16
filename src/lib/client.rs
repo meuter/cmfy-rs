@@ -29,13 +29,17 @@ impl Client {
         Ok(parsed)
     }
 
-    pub async fn post<R: DeserializeOwned>(&self, route: impl AsRef<str>, payload: &impl Serialize) -> Result<R> {
+    pub async fn post<R: DeserializeOwned>(&self, route: impl AsRef<str>, payload: &impl Serialize) -> Result<Option<R>> {
         let url = format!("http://{}:{}/{}", self.server, self.port, route.as_ref());
         let body = serde_json::to_string(payload)?;
         let response = self.client.post(url).body(body).send().await?;
         let body = response.error_for_status()?.bytes().await?;
-        let parsed = serde_json::from_slice(&body)?;
-        Ok(parsed)
+        if body.is_empty() {
+            Ok(None)
+        } else {
+            let parsed = serde_json::from_slice(&body)?;
+            Ok(Some(parsed))
+        }
     }
 
     pub async fn system_stats(&self) -> Result<dto::SystemStats> {
@@ -52,7 +56,9 @@ impl Client {
 
     async fn clear(&self, route: impl AsRef<str>) -> Result<()> {
         let payload = serde_json::json!({"clear":true});
-        self.post(route, &payload).await
+        let response: Option<()> = self.post(route, &payload).await?;
+        assert!(response.is_none());
+        Ok(())
     }
 
     pub async fn clear_queue(&self) -> Result<()> {
@@ -63,8 +69,16 @@ impl Client {
         self.clear("history").await
     }
 
+    pub async fn cancel_running_prompt(&self) -> Result<()> {
+        let payload = serde_json::Value::Null;
+        let response: Option<()> = self.post("interrupt", &payload).await?;
+        assert!(response.is_none());
+        Ok(())
+    }
+
     pub async fn submit(&self, nodes: &dto::PromptNodes) -> Result<dto::SubmitResponse> {
         let payload = serde_json::json!({"prompt": nodes});
-        self.post("prompt", &payload).await
+        let response = self.post("prompt", &payload).await?;
+        response.ok_or("invalid response".into())
     }
 }

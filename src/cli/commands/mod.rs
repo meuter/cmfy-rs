@@ -6,6 +6,7 @@ mod list;
 mod capture;
 mod submit;
 mod open;
+mod cancel;
 
 pub use stats::Stats;
 pub use queue::Queue;
@@ -15,6 +16,7 @@ pub use list::List;
 pub use capture::Capture;
 pub use submit::Submit;
 pub use open::Open;
+pub use cancel::Cancel;
 
 use cmfy::{Client, Result};
 

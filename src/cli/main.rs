@@ -3,7 +3,7 @@ mod io;
 
 use clap::{Parser, Subcommand};
 use cmfy::{Client, Result};
-use commands::{Capture, Get, History, List, Open, Queue, Run, Stats, Submit};
+use commands::{Cancel, Capture, Get, History, List, Open, Queue, Run, Stats, Submit};
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -30,6 +30,7 @@ enum Command {
     List(List),
     Open(Open),
     Capture(Capture),
+    Cancel(Cancel),
     Get(Get),
     Submit(Submit),
 }
@@ -43,6 +44,7 @@ impl Run for Command {
             Queue(cmd) => cmd.run(client).await,
             List(cmd) => cmd.run(client).await,
             Open(cmd) => cmd.run(client).await,
+            Cancel(cmd) => cmd.run(client).await,
             Capture(cmd) => cmd.run(client).await,
             Get(cmd) => cmd.run(client).await,
             Submit(cmd) => cmd.run(client).await,
