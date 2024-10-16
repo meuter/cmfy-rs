@@ -1,8 +1,11 @@
+mod client;
 mod dto;
+mod error;
 
-use std::error::Error;
 use clap::Parser;
+use client::Client;
 use dto::SystemStats;
+use std::error::Error;
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -18,15 +21,10 @@ struct Cli {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>>{
+async fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
-
-    let client = reqwest::Client::new();
-    let url = format!("http://{}:{}/system_stats", args.server, args.port);
-    let response = client.get(url).send().await.unwrap();
-    let body = response.error_for_status()?.bytes().await?;
-    let stats : SystemStats= serde_json::from_slice(&body)?;
-
+    let client = Client::new(args.server, args.port);
+    let stats: SystemStats = client.get("system_stats").await?;
     println!("{:#?}", stats);
     Ok(())
 }
