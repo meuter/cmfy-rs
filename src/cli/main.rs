@@ -34,6 +34,9 @@ enum Command {
     /// Lists prompts from queue
     Queue,
 
+    /// List all aprompts from history and queue
+    List,
+
     /// Display GET request raw json output.
     Get {
         /// the route, e.g. "/history"
@@ -74,10 +77,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 );
             }
         }
-        Get { route } => {
-            let response: serde_json::Value = client.get(route).await?;
-            println!("{:#?}", response);
-        }
         History => {
             let history = client.history().await?;
             PromptList::from(history).display()
@@ -85,6 +84,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         Queue => {
             let queue = client.queue().await?;
             PromptList::from(queue).display()
+        }
+        List => {
+            let history = client.history().await?;
+            let queue = client.queue().await?;
+            PromptList::from((history, queue)).display()
+        }
+        Get { route } => {
+            let response: serde_json::Value = client.get(route).await?;
+            println!("{:#?}", response);
         }
     }
     Ok(())
