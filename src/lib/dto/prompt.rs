@@ -20,3 +20,10 @@ pub struct Node<I> {
     pub class_type: String,
     pub inputs: I,
 }
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct SubmitResponse {
+    pub number: u32,
+    pub prompt_id: String,
+    pub node_errors: serde_json::Value,
+}

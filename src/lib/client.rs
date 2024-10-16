@@ -1,6 +1,6 @@
+use crate::{dto, error::Result};
 use reqwest::Url;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use crate::{dto::{self, PromptNodes}, error::Result};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub struct Client {
     client: reqwest::Client,
@@ -16,7 +16,7 @@ impl Client {
     }
 
     pub fn base_url(&self) -> Result<Url> {
-        let address =format!("http://{}:{}", self.server, self.port);
+        let address = format!("http://{}:{}", self.server, self.port);
         let url = Url::parse(address.as_str())?;
         Ok(url)
     }
@@ -63,16 +63,8 @@ impl Client {
         self.clear("history").await
     }
 
-    pub async fn submit(&self, nodes: &PromptNodes) -> Result<SubmitResponse> {
+    pub async fn submit(&self, nodes: &dto::PromptNodes) -> Result<dto::SubmitResponse> {
         let payload = serde_json::json!({"prompt": nodes});
         self.post("prompt", &payload).await
     }
 }
-
-#[derive(Deserialize, Debug, Clone)]
-pub struct SubmitResponse {
-    pub number: u32,
-    pub prompt_id: String,
-    pub node_errors: serde_json::Value,
-}
-
