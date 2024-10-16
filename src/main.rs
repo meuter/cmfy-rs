@@ -1,3 +1,4 @@
+use std::error::Error;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -13,7 +14,15 @@ struct Cli {
     port: u32,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>>{
     let args = Cli::parse();
-    println!("{:#?}", args);
+
+    let client = reqwest::Client::new();
+    let url = format!("http://{}:{}/system_stats", args.server, args.port);
+    let response = client.get(url).send().await.unwrap();
+    let body = response.error_for_status()?.bytes().await;
+
+    println!("{:#?}", body);
+    Ok(())
 }
