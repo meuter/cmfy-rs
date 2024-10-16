@@ -30,4 +30,8 @@ impl Client {
     pub async fn history(&self) -> Result<dto::History> {
         self.get("history").await
     }
+
+    pub async fn queue(&self) -> Result<dto::Queue> {
+        self.get("queue").await
+    }
 }

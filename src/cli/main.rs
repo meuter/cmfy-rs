@@ -83,8 +83,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
         Queue => {
-            let queue: serde_json::Value = client.get("queue").await?;
-            println!("{:#?}", queue);
+            let queue = client.queue().await?;
+            for prompt in queue.running {
+                let index = format!("[{}]", prompt.index);
+                println!("{:<5}{} (running)", index, prompt.uuid);
+            }
+            for prompt in queue.pending {
+                let index = format!("[{}]", prompt.index);
+                println!("{:<5}{}", index, prompt.uuid);
+            }
         }
     }
     Ok(())
