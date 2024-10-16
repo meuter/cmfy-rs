@@ -26,6 +26,7 @@ Commands:
   capture  Capture running and pending prompt to file
   get      Display GET request raw json output
   submit   Submits a batch of prompts to the server
+  view     Open images from completed prompts in a browser
   help     Print this message or the help of the given subcommand(s)
 
 Options:
