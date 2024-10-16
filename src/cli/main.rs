@@ -77,9 +77,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         History => {
             let history = client.history().await?;
-            for prompt in history.into_values().map(|entry| entry.prompt) {
+            for entry in history.into_values() {
+                let prompt = &entry.prompt;
                 let index = format!("[{}]", prompt.index);
-                println!("{:<5}{}", index, prompt.uuid);
+                print!("{:<5}{}", index, prompt.uuid);
+                if entry.cancelled() {
+                    print!(" (cancelled)");
+                }
+                println!()
             }
         }
         Queue => {

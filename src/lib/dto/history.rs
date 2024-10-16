@@ -1,3 +1,4 @@
+use super::Prompt;
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -10,15 +11,6 @@ pub struct HistoryLogEntry {
     pub outputs: Outputs,
     pub status: Status,
     pub meta: Meta,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct Prompt {
-    pub index: u64,
-    pub uuid: String,
-    pub nodes: serde_json::Value,
-    pub png_info: serde_json::Value,
-    pub output_nodes: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -71,4 +63,10 @@ pub struct Metadata {
     pub display_node: String,
     pub parent_node: Option<String>,
     pub real_node_id: String,
+}
+
+impl HistoryLogEntry {
+    pub fn cancelled(&self) -> bool {
+        self.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped)
+    }
 }
