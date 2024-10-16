@@ -14,8 +14,7 @@ impl Run for Queue {
         let queue = client.queue().await?;
         super::list::PromptList::from(queue).display();
         if self.clear {
-            let payload = serde_json::json!({"clear":true});
-            client.post("queue", &payload).await?;
+            client.clear_queue().await?;
         }
         Ok(())
     }

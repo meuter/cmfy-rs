@@ -14,8 +14,7 @@ impl Run for History {
         let history = client.history().await?;
         PromptList::from(history).display();
         if self.clear {
-            let payload = serde_json::json!({"clear":true});
-            client.post("history", &payload).await?;
+            client.clear_history().await?;
         }
         Ok(())
     }

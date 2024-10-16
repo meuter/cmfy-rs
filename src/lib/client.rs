@@ -42,4 +42,17 @@ impl Client {
     pub async fn queue(&self) -> Result<dto::Queue> {
         self.get("queue").await
     }
+
+    async fn clear(&self, route: impl AsRef<str>) -> Result<()> {
+        let payload = serde_json::json!({"clear":true});
+        self.post(route, &payload).await
+    }
+
+    pub async fn clear_queue(&self) -> Result<()> {
+        self.clear("queue").await
+    }
+
+    pub async fn clear_history(&self) -> Result<()> {
+        self.clear("history").await
+    }
 }
