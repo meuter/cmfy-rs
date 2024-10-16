@@ -1,35 +1,8 @@
-use std::{fs::File, io::Write, path::Path};
-
 use cmfy::{Error, Result};
 use serde::Serialize;
+use std::{fs::File, io::Write, path::PathBuf};
 
 pub struct Output(Box<dyn Write>);
-
-impl<P> TryFrom<Option<P>> for Output
-where
-    P: AsRef<Path>,
-{
-    type Error = Error;
-
-    fn try_from(maybe_path: Option<P>) -> Result<Self> {
-        let writer: Box<dyn Write> = if let Some(path) = maybe_path {
-            Box::new(File::create(path)?)
-        } else {
-            Box::new(std::io::stdout())
-        };
-        Ok(Self(writer))
-    }
-}
-
-impl Write for Output {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.0.write(buf)
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.0.flush()
-    }
-}
 
 impl Default for Output {
     fn default() -> Self {
@@ -37,12 +10,32 @@ impl Default for Output {
     }
 }
 
-impl Output {
-    pub fn write_json<T: Serialize>(self, value: &T, pretty: bool) -> Result<()> {
-        if pretty {
-            Ok(serde_json::to_writer_pretty(self, &value)?)
+impl TryFrom<PathBuf> for Output {
+    type Error = Error;
+
+    fn try_from(path: PathBuf) -> Result<Self> {
+        Ok(Self(Box::new(File::create(path)?)))
+    }
+}
+
+impl TryFrom<Option<PathBuf>> for Output {
+    type Error = Error;
+
+    fn try_from(maybe_path: Option<PathBuf>) -> Result<Self> {
+        if let Some(path) = maybe_path {
+            Self::try_from(path)
         } else {
-            Ok(serde_json::to_writer(self, &value)?)
+            Ok(Self::default())
+        }
+    }
+}
+
+impl Output {
+    pub fn write_json(self, value: &impl Serialize, pretty: bool) -> Result<()> {
+        if pretty {
+            Ok(serde_json::to_writer_pretty(self.0, &value)?)
+        } else {
+            Ok(serde_json::to_writer(self.0, &value)?)
         }
     }
 }
