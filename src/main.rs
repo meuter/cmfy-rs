@@ -1,5 +1,6 @@
 use std::error::Error;
 use clap::Parser;
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -14,6 +15,35 @@ struct Cli {
     port: u32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemStats {
+    pub system: System,
+    pub devices: Vec<Device>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct System {
+    pub os: String,
+    pub comfyui_version: String,
+    pub python_version: String,
+    pub pytorch_version: String,
+    pub embedded_python: bool,
+    pub argv: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Device {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+    pub index: u32,
+    pub vram_total: u64,
+    pub vram_free: u64,
+    pub torch_vram_total: u64,
+    pub torch_vram_free: u64,
+}
+
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
     let args = Cli::parse();
@@ -21,8 +51,9 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let client = reqwest::Client::new();
     let url = format!("http://{}:{}/system_stats", args.server, args.port);
     let response = client.get(url).send().await.unwrap();
-    let body = response.error_for_status()?.bytes().await;
+    let body = response.error_for_status()?.bytes().await?;
+    let stats : SystemStats= serde_json::from_slice(&body)?;
 
-    println!("{:#?}", body);
+    println!("{:#?}", stats);
     Ok(())
 }
