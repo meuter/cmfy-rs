@@ -204,7 +204,7 @@ checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
 
 [[package]]
 name = "cmfy"
-version = "0.1.1"
+version = "0.2.0-wip"
 dependencies = [
  "chrono",
  "clap",
@@ -213,9 +213,11 @@ dependencies = [
  "humantime",
  "itertools",
  "open",
+ "range-parser",
  "reqwest",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "size",
  "tokio",
 ]
@@ -845,6 +847,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "range-parser"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d26b5df187f049cc0264bed9ed314d5a5f7c13a2c3ec8b23b79723f938f39d71"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
 name = "reqwest"
 version = "0.12.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1149,6 +1160,26 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.64"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d50af8abc119fb8bb6dbabcfa89656f46f84aa0ac7688088608076ad2b459a84"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.64"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08904e7672f5eb876eaaf87e0ce17857500934f4981c4a0ab2b4aa98baac7fc3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -1,24 +1,26 @@
-mod stats;
-mod queue;
-mod history;
-mod get;
-mod list;
-mod capture;
-mod submit;
-mod open;
 mod cancel;
+mod capture;
 mod clear;
+mod get;
+mod history;
+mod list;
+mod open;
+mod queue;
+mod stats;
+mod submit;
+mod view;
 
-pub use stats::Stats;
-pub use queue::Queue;
-pub use history::History;
-pub use get::Get;
-pub use list::List;
-pub use capture::Capture;
-pub use submit::Submit;
-pub use open::Open;
 pub use cancel::Cancel;
+pub use capture::Capture;
 pub use clear::Clear;
+pub use get::Get;
+pub use history::History;
+pub use list::List;
+pub use open::Open;
+pub use queue::Queue;
+pub use stats::Stats;
+pub use submit::Submit;
+pub use view::View;
 
 use cmfy::{Client, Result};
 

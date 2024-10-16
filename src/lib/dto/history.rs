@@ -1,6 +1,6 @@
 use super::Prompt;
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{btree_map::IntoValues, BTreeMap};
 
 #[derive(Debug, Clone, Deserialize)]
@@ -17,7 +17,22 @@ pub struct HistoryLogEntry {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(transparent)]
-pub struct Outputs(pub BTreeMap<String, serde_json::Value>);
+pub struct Outputs(pub BTreeMap<String, Output>);
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+pub enum Output {
+    Images { images: Vec<Image> },
+    Other(BTreeMap<String, Vec<serde_json::Value>>),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Image {
+    pub filename: String,
+    pub subfolder: String,
+    #[serde(rename = "type")]
+    pub _type: String,
+}
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Status {
@@ -78,12 +93,28 @@ impl IntoIterator for History {
     type IntoIter = IntoValues<String, HistoryLogEntry>;
 
     fn into_iter(self) -> Self::IntoIter {
-       self.0.into_values()
+        self.0.into_values()
     }
 }
 
 impl HistoryLogEntry {
     pub fn cancelled(&self) -> bool {
         self.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped)
+    }
+
+    pub fn into_outputs(self) -> impl Iterator<Item = Output> {
+        self.outputs.0.into_values()
+    }
+
+    pub fn into_output_images(self) -> impl Iterator<Item = Image> {
+        self.into_outputs()
+            .filter_map(|output| {
+                if let Output::Images { images } = output {
+                    Some(images)
+                } else {
+                    None
+                }
+            })
+            .flatten()
     }
 }

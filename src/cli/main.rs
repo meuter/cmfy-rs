@@ -6,7 +6,7 @@ use clap::{
     Parser, Subcommand,
 };
 use cmfy::{Client, Result};
-use commands::{Cancel, Capture, Clear, Get, History, List, Open, Queue, Run, Stats, Submit};
+use commands::{Cancel, Capture, Clear, Get, History, List, Open, Queue, Run, Stats, Submit, View};
 
 pub fn build_styles() -> Styles {
     Styles::styled()
@@ -46,6 +46,7 @@ enum Command {
     Capture(Capture),
     Get(Get),
     Submit(Submit),
+    View(View),
 }
 
 impl Run for Command {
@@ -62,6 +63,7 @@ impl Run for Command {
             Capture(cmd) => cmd.run(client).await,
             Get(cmd) => cmd.run(client).await,
             Submit(cmd) => cmd.run(client).await,
+            View(cmd) => cmd.run(client).await,
         }
     }
 }

@@ -21,6 +21,13 @@ impl Client {
         Ok(url)
     }
 
+    pub fn url_for_image(&self, image: &dto::Image) -> Result<Url> {
+        let params = serde_urlencoded::to_string(image)?;
+        let address = format!("http://{}:{}/api/view?{}", self.server, self.port, params);
+        let url = Url::parse(address.as_str())?;
+        Ok(url)
+    }
+
     pub async fn get<R: DeserializeOwned>(&self, route: impl AsRef<str>) -> Result<R> {
         let url = format!("http://{}:{}/{}", self.server, self.port, route.as_ref());
         let response = self.client.get(url).send().await?;
