@@ -36,7 +36,11 @@ enum Command {
     },
 
     /// Lists prompts from queue
-    Queue,
+    Queue {
+        /// Clears all pending prompts from the queue after printing
+        #[clap(long, short, action, default_value_t = false)]
+        clear: bool,
+    },
 
     /// List all aprompts from history and queue
     List,
@@ -89,9 +93,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 client.post("history", &payload).await?;
             }
         }
-        Queue => {
+        Queue { clear } => {
             let queue = client.queue().await?;
             PromptList::from(queue).display();
+            if clear {
+                let payload = serde_json::json!({"clear":true});
+                client.post("queue", &payload).await?;
+            }
         }
         List => {
             let history = client.history().await?;
