@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use super::Run;
 use clap::Args;
-use crate::output::Output;
+use crate::io::Output;
 
 /// Display GET request raw json output.
 ///

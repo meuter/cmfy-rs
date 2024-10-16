@@ -2,7 +2,7 @@ use clap::Args;
 use itertools::Itertools;
 use std::path::PathBuf;
 
-use crate::output::Output;
+use crate::io::Output;
 
 use super::{list::PromptList, Run};
 
@@ -55,7 +55,10 @@ impl Run for Capture {
             list.append(&mut PromptList::from(history));
         }
 
-        let prompts = list.into_prompts().collect_vec();
+        // NOTE: The history and queue return submitted prompts with UUID, index, and possibly
+        //       output nodes. The goal of capturing the prompts is to submit them for which
+        //       we do not need the submit information. We just need the prompt nodes.
+        let prompts = list.into_prompts().map(|prompt| prompt.nodes).collect_vec();
         let output = Output::try_from(self.output)?;
         output.write_json(&prompts, self.pretty)
 

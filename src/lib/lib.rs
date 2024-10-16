@@ -1,5 +1,5 @@
+pub mod dto;
 mod client;
-mod dto;
 mod error;
 
 pub use client::Client;

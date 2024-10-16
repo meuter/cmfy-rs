@@ -1,10 +1,14 @@
 mod commands;
-mod output;
+mod io;
 
 use clap::{Parser, Subcommand};
 use cmfy::{Client, Result};
-use commands::{Capture, Get, History, List, Queue, Run, Stats};
+use commands::{Capture, Get, History, List, Queue, Run, Stats, Submit};
 
+/// Submits a batch of prompts to the server.
+///
+/// Reads a batch of prompts from a JSON file and submits it
+/// to the server.
 #[derive(Parser, Debug)]
 #[clap(version)]
 #[command(infer_subcommands = true)]
@@ -30,6 +34,7 @@ enum Command {
     List(List),
     Capture(Capture),
     Get(Get),
+    Submit(Submit),
 }
 
 impl Run for Command {
@@ -42,6 +47,7 @@ impl Run for Command {
             List(cmd) => cmd.run(client).await,
             Capture(cmd) => cmd.run(client).await,
             Get(cmd) => cmd.run(client).await,
+            Submit(cmd) => cmd.run(client).await,
         }
     }
 }
