@@ -9,7 +9,7 @@ pub struct HistoryLogEntry {
     pub prompt: Prompt,
     pub outputs: Outputs,
     pub status: Status,
-    pub meta: BTreeMap<u32, Metadata>,
+    pub meta: Meta,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -63,7 +63,7 @@ pub struct MessageData {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(transparent)]
-pub struct Meta(BTreeMap<u32, Metadata>);
+pub struct Meta(pub BTreeMap<u32, Metadata>);
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Metadata {

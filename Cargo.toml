@@ -3,6 +3,14 @@ name = "cmfy"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "cmfy"
+path = "src/lib/lib.rs"
+
+[[bin]]
+name = "cmfy"
+path = "src/cli/main.rs"
+
 [dependencies]
 chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.20", features = ["derive", "env"] }

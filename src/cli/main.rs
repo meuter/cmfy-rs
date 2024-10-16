@@ -1,9 +1,5 @@
-mod client;
-mod dto;
-mod error;
-
 use clap::{Parser, Subcommand};
-use client::Client;
+use cmfy::Client;
 use humansize::{make_format, BINARY};
 use std::error::Error;
 
@@ -81,7 +77,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         History => {
             let history = client.history().await?;
-            println!("{:#?}", history);
+            for prompt in history.into_values().map(|entry| entry.prompt) {
+                let index = format!("[{}]", prompt.index);
+                println!("{:<5}{}", index, prompt.uuid);
+            }
         }
         Queue => {
             let queue: serde_json::Value = client.get("queue").await?;
