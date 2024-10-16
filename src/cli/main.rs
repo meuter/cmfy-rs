@@ -1,13 +1,25 @@
 mod commands;
 mod io;
 
-use clap::{Parser, Subcommand};
+use clap::{
+    builder::{styling::AnsiColor, Styles},
+    Parser, Subcommand,
+};
 use cmfy::{Client, Result};
 use commands::{Cancel, Capture, Get, History, List, Open, Queue, Run, Stats, Submit};
 
+pub fn build_styles() -> Styles {
+    Styles::styled()
+        .header(AnsiColor::Yellow.on_default().underline())
+        .usage(AnsiColor::Yellow.on_default().underline())
+        .literal(AnsiColor::Green.on_default())
+        .placeholder(AnsiColor::BrightWhite.on_default())
+        .error(AnsiColor::BrightRed.on_default())
+}
+
 #[derive(Parser, Debug)]
 #[clap(version)]
-#[command(infer_subcommands = true)]
+#[command(styles=build_styles(), color=clap::ColorChoice::Always, infer_subcommands = true)]
 struct Cli {
     /// ip of the server
     #[arg(short, long, env = "COMFY_SERVER", value_name = "SERVER", default_value = "localhost")]
