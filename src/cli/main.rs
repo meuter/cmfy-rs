@@ -2,7 +2,7 @@ mod commands;
 
 use clap::{Parser, Subcommand};
 use cmfy::{Client, Result};
-use commands::{Get, History, List, Queue, Run, Stats};
+use commands::{Capture, Get, History, List, Queue, Run, Stats};
 
 #[derive(Parser, Debug)]
 #[clap(version)]
@@ -27,6 +27,7 @@ enum Command {
     History(History),
     Queue(Queue),
     List(List),
+    Capture(Capture),
     Get(Get),
 }
 
@@ -34,11 +35,12 @@ impl Run for Command {
     async fn run(self, client: Client) -> Result<()> {
         use Command::*;
         match self {
-            Stats(stats) => stats.run(client).await,
-            History(history) => history.run(client).await,
-            Queue(queue) => queue.run(client).await,
-            List(list) => list.run(client).await,
-            Get(get) => get.run(client).await,
+            Stats(cmd) => cmd.run(client).await,
+            History(cmd) => cmd.run(client).await,
+            Queue(cmd) => cmd.run(client).await,
+            List(cmd) => cmd.run(client).await,
+            Capture(cmd) => cmd.run(client).await,
+            Get(cmd) => cmd.run(client).await,
         }
     }
 }
