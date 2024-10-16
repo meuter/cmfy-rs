@@ -1,7 +1,7 @@
 use super::Run;
 use clap::Args;
 
-/// Lists prompts from queue
+/// Lists and optionally clears prompts from queue
 #[derive(Debug, Args)]
 pub struct Queue {
     /// Clears all pending prompts from the queue after printing

@@ -1,7 +1,7 @@
 use super::{list::PromptList, Run};
 use clap::Args;
 
-/// Lists prompts from history
+/// Lists and optionally clears prompts from history
 #[derive(Debug, Args)]
 pub struct History {
     /// Clears all prompt from history after printing

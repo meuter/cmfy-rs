@@ -21,7 +21,7 @@ pub fn build_styles() -> Styles {
 #[clap(version)]
 #[command(styles=build_styles(), color=clap::ColorChoice::Always, infer_subcommands = true)]
 struct Cli {
-    /// ip of the server
+    /// hostname of the server
     #[arg(short, long, env = "COMFY_SERVER", value_name = "SERVER", default_value = "localhost")]
     server: String,
 

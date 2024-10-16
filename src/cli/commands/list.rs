@@ -6,7 +6,7 @@ use colored::Colorize;
 use itertools::Itertools;
 use std::{fmt::Display, iter::empty};
 
-/// List all aprompts from history and queue
+/// List all prompts from history and queue
 #[derive(Debug, Args)]
 pub struct List {}
 

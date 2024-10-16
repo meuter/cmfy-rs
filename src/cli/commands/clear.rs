@@ -5,7 +5,7 @@ use tokio::time::timeout;
 
 use super::Run;
 
-/// clear currently running prompt
+/// Clear all prompts from history, queue and currently running prompt
 #[derive(Debug, Args)]
 pub struct Clear {
     /// Waits for the clear operation to be finished before returning.
