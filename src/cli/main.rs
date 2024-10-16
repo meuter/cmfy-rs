@@ -29,7 +29,11 @@ enum Command {
     Stats,
 
     /// Lists prompts from history
-    History,
+    History {
+        /// Clears all prompt from history after printing
+        #[clap(long, short, action, default_value_t = false)]
+        clear: bool,
+    },
 
     /// Lists prompts from queue
     Queue,
@@ -77,22 +81,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 );
             }
         }
-        History => {
+        History { clear } => {
             let history = client.history().await?;
-            PromptList::from(history).display()
+            PromptList::from(history).display();
+            if clear {
+                let payload = serde_json::json!({"clear":true});
+                client.post("history", &payload).await?;
+            }
         }
         Queue => {
             let queue = client.queue().await?;
-            PromptList::from(queue).display()
+            PromptList::from(queue).display();
         }
         List => {
             let history = client.history().await?;
             let queue = client.queue().await?;
-            PromptList::from((history, queue)).display()
+            PromptList::from((history, queue)).display();
         }
         Get { route } => {
             let response: serde_json::Value = client.get(route).await?;
-            println!("{:#?}", response);
+            serde_json::to_writer(std::io::stdout(), &response)?;
         }
     }
     Ok(())

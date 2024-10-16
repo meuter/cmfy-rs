@@ -1,4 +1,4 @@
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{dto, error::Result};
 
@@ -21,6 +21,14 @@ impl Client {
         let body = response.error_for_status()?.bytes().await?;
         let parsed = serde_json::from_slice(&body)?;
         Ok(parsed)
+    }
+
+    pub async fn post(&self, route: impl AsRef<str>, payload: &impl Serialize) -> Result<()> {
+        let url = format!("http://{}:{}/{}", self.server, self.port, route.as_ref());
+        let body = serde_json::to_string(payload)?;
+        let response = self.client.post(url).body(body).send().await?;
+        response.error_for_status()?;
+        Ok(())
     }
 
     pub async fn system_stats(&self) -> Result<dto::SystemStats> {
