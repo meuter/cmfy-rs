@@ -10,6 +10,23 @@ use std::{fmt::Display, iter::empty};
 #[derive(Debug, Args)]
 pub struct List {}
 
+#[derive(Debug, Default, Clone)]
+pub struct PromptList(Vec<Entry>);
+
+#[derive(Debug, Clone)]
+struct Entry {
+    prompt: Prompt,
+    status: Status,
+}
+
+#[derive(Debug, Clone)]
+enum Status {
+    Completed,
+    Pending,
+    Running,
+    Cancelled,
+}
+
 impl Run for List {
     async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
         let history = client.history().await?;
@@ -17,13 +34,6 @@ impl Run for List {
         PromptList::from((history, queue)).display();
         Ok(())
     }
-}
-
-enum Status {
-    Completed,
-    Pending,
-    Running,
-    Cancelled,
 }
 
 impl Display for Status {
@@ -38,14 +48,11 @@ impl Display for Status {
     }
 }
 
-struct Entry {
-    prompt: Prompt,
-    status: Status,
-}
-
-pub struct PromptList(Vec<Entry>);
-
 impl PromptList {
+    pub fn append(&mut self, other: &mut PromptList) {
+        self.0.append(&mut other.0);
+    }
+
     pub fn display(mut self) {
         self.0.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
         for entry in self.0 {
@@ -54,13 +61,17 @@ impl PromptList {
             println!("{:<15}{} ({})", index, prompt.uuid, entry.status);
         }
     }
+
+    pub fn into_prompts(self) -> impl Iterator<Item = Prompt> {
+        self.0.into_iter().map(|entry| entry.prompt)
+    }
 }
 
 impl From<History> for PromptList {
     fn from(history: History) -> Self {
         use Status::*;
         let entries = history
-            .into_values()
+            .into_iter()
             .map(|entry| {
                 let status = if entry.cancelled() { Cancelled } else { Completed };
                 let prompt = entry.prompt;

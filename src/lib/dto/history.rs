@@ -1,9 +1,11 @@
 use super::Prompt;
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
 use serde::Deserialize;
-use std::collections::BTreeMap;
+use std::collections::{btree_map::IntoValues, BTreeMap};
 
-pub type History = BTreeMap<String, HistoryLogEntry>;
+#[derive(Debug, Clone, Deserialize)]
+#[serde(transparent)]
+pub struct History(pub BTreeMap<String, HistoryLogEntry>);
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct HistoryLogEntry {
@@ -63,6 +65,21 @@ pub struct Metadata {
     pub display_node: String,
     pub parent_node: Option<String>,
     pub real_node_id: String,
+}
+
+impl History {
+    pub fn into_prompts(self) -> impl Iterator<Item = Prompt> {
+        self.0.into_values().map(|entry| entry.prompt)
+    }
+}
+
+impl IntoIterator for History {
+    type Item = HistoryLogEntry;
+    type IntoIter = IntoValues<String, HistoryLogEntry>;
+
+    fn into_iter(self) -> Self::IntoIter {
+       self.0.into_values()
+    }
 }
 
 impl HistoryLogEntry {

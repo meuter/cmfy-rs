@@ -1,7 +1,8 @@
 use clap::Args;
+use itertools::Itertools;
 use std::{fs::File, io::Write, path::PathBuf};
 
-use super::Run;
+use super::{list::PromptList, Run};
 
 /// Capture running and pending prompt to file.
 ///
@@ -10,19 +11,15 @@ use super::Run;
 /// can then be re-queues using the 'submit' command.#[derive(Debug, Args)]
 #[derive(Debug, Args)]
 pub struct Capture {
-    /// Capture completed prompts
+    /// Capture all prompts from queue (running and pending)
     #[clap(long, short, action, default_value_t = false)]
-    completed: bool,
+    queue: bool,
 
-    /// Capture pending prompts.
-    #[clap(long, short, action, default_value_t = false)]
-    pending: bool,
+    /// Capture all prompts from history (completed and cancelled)
+    #[clap(long, short='s', action, default_value_t = false)]
+    history: bool,
 
-    /// Capture currently running prompts.
-    #[clap(long, short, action, default_value_t = false)]
-    running: bool,
-
-    /// Capture both running and pending prompts.
+    /// Capture all promts from both queue and history
     #[clap(long, short, action, default_value_t = true)]
     all: bool,
 
@@ -38,29 +35,22 @@ pub struct Capture {
 
 impl Run for Capture {
     async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
-        if self.running || self.pending || self.completed {
+        if self.queue || self.history {
             self.all = false;
         }
         if self.all {
-            self.completed = true;
-            self.pending = true;
-            self.running = true;
+            self.queue = true;
+            self.history = true;
         }
 
-        let mut prompts = Vec::new();
-        if self.running || self.pending {
-            let mut queue = client.queue().await?;
-            if self.running {
-                prompts.append(&mut queue.running);
-            }
-            if self.pending {
-                prompts.append(&mut queue.pending);
-            }
+        let mut list = PromptList::default();
+        if self.queue {
+            let queue = client.queue().await?;
+            list.append(&mut PromptList::from(queue));
         }
-
-        if self.completed {
-            let mut history = client.history().await?.into_values().map(|entry| entry.prompt).collect();
-            prompts.append(&mut history)
+        if self.history {
+            let history = client.history().await?;
+            list.append(&mut PromptList::from(history));
         }
 
         let writer: Box<dyn Write> = if let Some(path) = self.output {
@@ -68,7 +58,7 @@ impl Run for Capture {
         } else {
             Box::new(std::io::stdout())
         };
-
+        let prompts = list.into_prompts().collect_vec();
         if self.pretty {
             Ok(serde_json::to_writer_pretty(writer, &prompts)?)
         } else {
