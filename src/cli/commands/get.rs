@@ -1,7 +1,7 @@
-use std::{fs::File, io::Write, path::PathBuf};
-
+use std::path::PathBuf;
 use super::Run;
 use clap::Args;
+use crate::output::Output;
 
 /// Display GET request raw json output.
 ///
@@ -27,18 +27,8 @@ pub struct Get {
 
 impl Run for Get {
     async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
-        let writer: Box<dyn Write> = if let Some(path) = self.output {
-            Box::new(File::create(path)?)
-        } else {
-            Box::new(std::io::stdout())
-        };
-
         let response: serde_json::Value = client.get(self.route).await?;
-
-        if self.pretty {
-            Ok(serde_json::to_writer_pretty(writer, &response)?)
-        } else {
-            Ok(serde_json::to_writer(writer, &response)?)
-        }
+        let output = Output::try_from(self.output)?;
+        output.write_json(&response, self.pretty)
     }
 }

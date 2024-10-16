@@ -1,6 +1,8 @@
 use clap::Args;
 use itertools::Itertools;
-use std::{fs::File, io::Write, path::PathBuf};
+use std::path::PathBuf;
+
+use crate::output::Output;
 
 use super::{list::PromptList, Run};
 
@@ -53,16 +55,9 @@ impl Run for Capture {
             list.append(&mut PromptList::from(history));
         }
 
-        let writer: Box<dyn Write> = if let Some(path) = self.output {
-            Box::new(File::create(path)?)
-        } else {
-            Box::new(std::io::stdout())
-        };
         let prompts = list.into_prompts().collect_vec();
-        if self.pretty {
-            Ok(serde_json::to_writer_pretty(writer, &prompts)?)
-        } else {
-            Ok(serde_json::to_writer(writer, &prompts)?)
-        }
+        let output = Output::try_from(self.output)?;
+        output.write_json(&prompts, self.pretty)
+
     }
 }

@@ -1,4 +1,5 @@
 mod commands;
+mod output;
 
 use clap::{Parser, Subcommand};
 use cmfy::{Client, Result};
