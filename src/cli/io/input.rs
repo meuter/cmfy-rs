@@ -23,7 +23,11 @@ impl Display for Input {
 
 impl From<OsString> for Input {
     fn from(value: OsString) -> Self {
-        Self(Some(PathBuf::from(value)))
+        if value == "<stdin>" {
+            Self::default()
+        } else {
+            Self(Some(PathBuf::from(value)))
+        }
     }
 }
 

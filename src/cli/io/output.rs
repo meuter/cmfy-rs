@@ -23,7 +23,11 @@ impl Display for Output {
 
 impl From<OsString> for Output {
     fn from(value: OsString) -> Self {
-        Self(Some(PathBuf::from(value)))
+        if value == "<stdout>" {
+            Self::default()
+        } else {
+            Self(Some(PathBuf::from(value)))
+        }
     }
 }
 
