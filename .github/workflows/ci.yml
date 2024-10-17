@@ -1,0 +1,102 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build with default feature
+        run: cargo build -r --workspace
+      - name: Display workspace contents
+        run: ls target/release
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: cmfy-${{ matrix.os }}
+          path: target/release/${{ matrix.os == 'windows-latest' && 'cmfy.exe' || 'cmfy' }}
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out repository
+        uses: actions/checkout@v4
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features --tests
+      - name: Check formatting
+        run: cargo fmt --all
+
+  release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    needs: [build, check]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Get commit id
+        run: |
+          commit_id=$(git rev-parse --short HEAD)
+          echo "commit_id=$commit_id" >> $GITHUB_OUTPUT
+        id: get_commit_id
+      - name: Download ubuntu binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-ubuntu-latest
+          path: artifacts/ubuntu/
+      - name: Download macos binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-macos-latest
+          path: artifacts/macos/
+      - name: Download windows binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-windows-latest
+          path: artifacts/windows/
+      - name: Rename artifacts
+        run: |
+          mv artifacts/windows/cmfy.exe artifacts/cmfy-win_x86_64-${{ steps.get_commit_id.outputs.commit_id }}.exe
+          mv artifacts/ubuntu/cmfy artifacts/cmfy-linux_x86_64-${{ steps.get_commit_id.outputs.commit_id }}
+          mv artifacts/macos/cmfy artifacts/cmfy-macos_x86_64-${{ steps.get_commit_id.outputs.commit_id }}
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Create GitHub pre-release
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete "latest" \
+              --repo="$GITHUB_REPOSITORY" \
+              --cleanup-tag \
+              --yes \
+              || echo "Release does not exist yet"
+          gh release create "latest" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="CI Build" \
+              --prerelease
+          gh release upload "latest" \
+              --repo="$GITHUB_REPOSITORY" \
+              artifacts/cmfy-linux_x86_64-${{ steps.get_commit_id.outputs.commit_id }}
+          gh release upload "latest" \
+              --repo="$GITHUB_REPOSITORY" \
+              artifacts/cmfy-macos_x86_64-${{ steps.get_commit_id.outputs.commit_id }}
+          gh release upload "latest" \
+              --repo="$GITHUB_REPOSITORY" \
+              artifacts/cmfy-win_x86_64-${{ steps.get_commit_id.outputs.commit_id }}.exe
+
