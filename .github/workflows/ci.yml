@@ -77,9 +77,9 @@ jobs:
           path: artifacts/windows/
       - name: Rename artifacts
         run: |
-          mv artifacts/windows/cmfy.exe artifacts/cmfy-win_x86_64.exe
-          mv artifacts/ubuntu/cmfy artifacts/cmfy-linux_x86_64
-          mv artifacts/macos/cmfy artifacts/cmfy-macos_x86_64
+          mv artifacts/windows/cmfy.exe dist/cmfy-win_x86_64.exe
+          mv artifacts/ubuntu/cmfy dist/cmfy-linux_x86_64
+          mv artifacts/macos/cmfy dist/cmfy-macos_x86_64
       - name: Display structure of downloaded files
         run: ls -R artifacts
       - name: Create pre-release
@@ -95,14 +95,6 @@ jobs:
           gh release create "latest" \
               --repo="$GITHUB_REPOSITORY" \
               --title="CI Build" \
-              --prerelease
-          gh release upload "latest" \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-linux_x86_64
-          gh release upload "latest" \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-macos_x86_64
-          gh release upload "latest" \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-win_x86_64.exe
+              --prerelease \
+              dist/*
 
