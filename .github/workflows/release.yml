@@ -1,0 +1,87 @@
+name: Official Release
+
+on:
+  push:
+    tags: [release/**]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build with default feature
+        run: cargo build -r --workspace
+      - name: Display workspace contents
+        run: ls target/release
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: error
+          name: cmfy-${{ matrix.os }}
+          path: target/release/${{ matrix.os == 'windows-latest' && 'cmfy.exe' || 'cmfy' }}
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout out repository
+        uses: actions/checkout@v4
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features --tests
+      - name: Check formatting
+        run: cargo fmt --all
+
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: [build, check]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download ubuntu binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-ubuntu-latest
+          path: artifacts/ubuntu/
+      - name: Download macos binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-macos-latest
+          path: artifacts/macos/
+      - name: Download windows binary
+        uses: actions/download-artifact@v4
+        with:
+          name: cmfy-windows-latest
+          path: artifacts/windows/
+      - name: Rename artifacts
+        run: |
+          mkdir -p dist/
+          mv artifacts/windows/cmfy.exe dist/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
+          mv artifacts/ubuntu/cmfy dist/cmfy-linux_x86_64-${GITHUB_REF##*/}
+          mv artifacts/macos/cmfy dist/cmfy-macos_x86_64-${GITHUB_REF##*/}
+      - name: Generate Changelog
+        run: |
+          echo "# Changelog" > CHANGELOG.md
+          git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate >> CHANGELOG.md
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+      - name: Create Release
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${GITHUB_REF##*/} \
+              -F CHANGELOG.md \
+              --prerelease \
+              dist/*
+
+
