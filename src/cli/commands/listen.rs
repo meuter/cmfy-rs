@@ -27,7 +27,6 @@ impl Run for Listen {
                 println!();
             }
         }
-
-        todo!()
+        Ok(())
     }
 }
