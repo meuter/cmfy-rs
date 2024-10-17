@@ -1,5 +1,3 @@
-use std::os::unix::ffi::OsStrExt;
-
 use crate::{dto, error::Result};
 use reqwest::Url;
 use ring::digest::{digest, SHA256};
@@ -23,7 +21,7 @@ impl Client {
         //       multiple invocation. So we take the full absolute path of the
         //       current executable as a basis to generate a Uuid.
         let full_executable_path = std::env::current_exe()?;
-        let hash = digest(&SHA256, full_executable_path.as_os_str().as_bytes());
+        let hash = digest(&SHA256, full_executable_path.as_os_str().as_encoded_bytes());
         let client_id = Uuid::from_slice(&hash.as_ref()[0..16])?;
         Ok(Self::new(hostname, port, client_id))
     }
