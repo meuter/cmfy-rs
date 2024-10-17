@@ -2,6 +2,7 @@ use cmfy::{Error, Result};
 use serde::de::DeserializeOwned;
 use std::{
     ffi::OsString,
+    fmt::Display,
     fs::File,
     io::{stdin, Read},
     path::PathBuf,
@@ -10,12 +11,12 @@ use std::{
 #[derive(Clone, Debug, Default)]
 pub struct Input(Option<PathBuf>);
 
-impl ToString for Input {
-    fn to_string(&self) -> String {
+impl Display for Input {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(path) = &self.0 {
-            path.display().to_string()
+            write!(f, "{}", path.display())
         } else {
-            "<stdin>".into()
+            write!(f, "<stdin>")
         }
     }
 }
