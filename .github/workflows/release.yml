@@ -1,13 +1,8 @@
-name: CI Build and Pre-release
+name: Official Release
 
 on:
   push:
-    branches:
-      - '**'
-    tags:
-      - ''
-  pull_request:
-
+    tags: [release/**]
 
 env:
   CARGO_TERM_COLOR: always
@@ -16,12 +11,10 @@ env:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,18 +41,12 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     needs: [build, check]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Get commit id
-        run: |
-          commit_id=$(git rev-parse --short HEAD)
-          echo "commit_id=$commit_id" >> $GITHUB_OUTPUT
-        id: get_commit_id
       - name: Download ubuntu binary
         uses: actions/download-artifact@v4
         with:
@@ -77,32 +64,28 @@ jobs:
           path: artifacts/windows/
       - name: Rename artifacts
         run: |
-          mv artifacts/windows/cmfy.exe artifacts/cmfy-win_x86_64.exe
-          mv artifacts/ubuntu/cmfy artifacts/cmfy-linux_x86_64
-          mv artifacts/macos/cmfy artifacts/cmfy-macos_x86_64
+          mv artifacts/windows/cmfy.exe artifacts/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
+          mv artifacts/ubuntu/cmfy artifacts/cmfy-linux_x86_64-${GITHUB_REF##*/}
+          mv artifacts/macos/cmfy artifacts/cmfy-macos_x86_64-${GITHUB_REF##*/}
       - name: Display structure of downloaded files
         run: ls -R artifacts
-      - name: Create pre-release
+      - name: Create Release
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "latest" \
+          gh release create ${GITHUB_REF##*/} \
               --repo="$GITHUB_REPOSITORY" \
-              --cleanup-tag \
-              --yes \
-              || echo "Release does not exist yet"
-          gh release create "latest" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="CI Build" \
+              --title=${GITHUB_REF##*/} \
               --prerelease
-          gh release upload "latest" \
+          gh release upload ${GITHUB_REF##*/} \
               --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-linux_x86_64
-          gh release upload "latest" \
+              artifacts/cmfy-linux_x86_64-${GITHUB_REF##*/}
+          gh release upload ${GITHUB_REF##*/} \
               --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-macos_x86_64
-          gh release upload "latest" \
+              artifacts/cmfy-macos_x86_64-${GITHUB_REF##*/}
+          gh release upload ${GITHUB_REF##*/} \
               --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-win_x86_64.exe
+              artifacts/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
+
 
