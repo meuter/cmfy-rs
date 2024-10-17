@@ -1,6 +1,8 @@
+use crate::io::JsonWrite;
+
 use super::{list::PromptList, Run};
-use crate::io::Output;
 use clap::Args;
+use clio::Output;
 use itertools::Itertools;
 
 /// Capture running and pending prompt to file.
@@ -23,7 +25,7 @@ pub struct Capture {
     all: bool,
 
     /// Output path to store the captured prompt(s).
-    #[clap(long, short, default_value_t = Output::default())]
+    #[clap(long, short, default_value = "-")]
     output: Output,
 
     /// Pretty prints the JSON output
@@ -55,6 +57,7 @@ impl Run for Capture {
         //       output nodes. The goal of capturing the prompts is to submit them for which
         //       we do not need the submit information. We just need the prompt nodes.
         let prompts = list.into_prompts().map(|prompt| prompt.nodes).collect_vec();
-        self.output.write_json(&prompts, self.pretty)
+        self.output.write_json(&prompts, self.pretty)?;
+        Ok(())
     }
 }

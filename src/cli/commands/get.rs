@@ -1,5 +1,5 @@
 use super::Run;
-use crate::io::Output;
+use crate::io::{JsonWrite, Output};
 use clap::Args;
 
 /// Display GET request raw json output.
@@ -15,7 +15,7 @@ pub struct Get {
     route: String,
 
     /// Output path to store the captured prompt(s).
-    #[clap(long, short, default_value_t = Output::default())]
+    #[clap(long, short, default_value = "-")]
     output: Output,
 
     /// Pretty prints the JSON output
@@ -24,7 +24,7 @@ pub struct Get {
 }
 
 impl Run for Get {
-    async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
+    async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
         let response: serde_json::Value = client.get(self.route).await?;
         self.output.write_json(&response, self.pretty)
     }

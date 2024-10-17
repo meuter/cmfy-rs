@@ -1,5 +1,5 @@
 use super::Run;
-use crate::io::Output;
+use crate::io::{JsonWrite, Output};
 use clap::Args;
 use cmfy::{Client, Result};
 use futures_util::StreamExt;
@@ -23,7 +23,7 @@ impl Run for Listen {
         while let Some(Ok(message)) = server.next().await {
             if let Some(text) = message.as_text() {
                 let parsed: serde_json::Value = serde_json::from_str(text)?;
-                Output::default().write_json(&parsed, self.pretty)?;
+                Output::std().write_json(&parsed, self.pretty)?;
                 println!();
             }
         }
