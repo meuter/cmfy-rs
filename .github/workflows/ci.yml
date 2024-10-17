@@ -77,6 +77,7 @@ jobs:
           path: artifacts/windows/
       - name: Rename artifacts
         run: |
+          mkdir -p dist/
           mv artifacts/windows/cmfy.exe dist/cmfy-win_x86_64.exe
           mv artifacts/ubuntu/cmfy dist/cmfy-linux_x86_64
           mv artifacts/macos/cmfy dist/cmfy-macos_x86_64

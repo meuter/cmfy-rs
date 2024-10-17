@@ -1,5 +1,4 @@
-[![Build](https://github.com/meuter/cmfy-rs/actions/workflows/build.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/build.yml)
-[![Clippy](https://github.com/meuter/cmfy-rs/actions/workflows/clippy.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/clippy.yml)
+[![Build](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml)
 
 [![Crates.io](https://img.shields.io/crates/v/cmfy)](https://crates.io/crates/cmfy)
 [![Docs.rs](https://docs.rs/cmfy/badge.svg)](https://docs.rs/cmfy)
