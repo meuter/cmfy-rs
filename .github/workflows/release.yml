@@ -64,9 +64,14 @@ jobs:
           path: artifacts/windows/
       - name: Rename artifacts
         run: |
-          mv artifacts/windows/cmfy.exe artifacts/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
-          mv artifacts/ubuntu/cmfy artifacts/cmfy-linux_x86_64-${GITHUB_REF##*/}
-          mv artifacts/macos/cmfy artifacts/cmfy-macos_x86_64-${GITHUB_REF##*/}
+          mkdir -p dist/
+          mv artifacts/windows/cmfy.exe dist/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
+          mv artifacts/ubuntu/cmfy dist/cmfy-linux_x86_64-${GITHUB_REF##*/}
+          mv artifacts/macos/cmfy dist/cmfy-macos_x86_64-${GITHUB_REF##*/}
+      - name: Generate Changelog
+        run: |
+          echo "# Changelog" > CHANGELOG.md
+          git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate > CHANGELOG.md
       - name: Display structure of downloaded files
         run: ls -R artifacts
       - name: Create Release
@@ -75,17 +80,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${GITHUB_REF##*/} \
-              --repo="$GITHUB_REPOSITORY" \
-              --title=${GITHUB_REF##*/} \
-              --prerelease
-          gh release upload ${GITHUB_REF##*/} \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-linux_x86_64-${GITHUB_REF##*/}
-          gh release upload ${GITHUB_REF##*/} \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-macos_x86_64-${GITHUB_REF##*/}
-          gh release upload ${GITHUB_REF##*/} \
-              --repo="$GITHUB_REPOSITORY" \
-              artifacts/cmfy-win_x86_64-${GITHUB_REF##*/}.exe
+              -F CHANGELOG.md \
+              --prerelease \
+              dist/*
 
 
