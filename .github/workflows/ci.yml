@@ -83,19 +83,20 @@ jobs:
           mv artifacts/macos/cmfy dist/cmfy-macos_x86_64
       - name: Display structure of downloaded files
         run: ls -R artifacts
+      - name: Generate Changelog
+        run: |
+          echo "" > CHANGELOG.md
       - name: Create pre-release
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete "latest" \
-              --repo="$GITHUB_REPOSITORY" \
               --cleanup-tag \
               --yes \
               || echo "Release does not exist yet"
           gh release create "latest" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="CI Build" \
+              -F CHANGELOG.md \
               --prerelease \
               dist/*
 

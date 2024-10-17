@@ -1,11 +1,10 @@
-[![Build](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml)
+# cmfy
 
+[![Build](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/meuter/cmfy-rs/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/cmfy)](https://crates.io/crates/cmfy)
 [![Docs.rs](https://docs.rs/cmfy/badge.svg)](https://docs.rs/cmfy)
 [![Crates.io](https://img.shields.io/crates/d/cmfy)](https://crates.io/crates/cmfy)
 [![Crates.io](https://img.shields.io/crates/l/cmfy)](https://github.com/meuter/cmfy/blob/main/LICENSE)
-
-# cmfy
 
 A CLI companion app for Comfy UI
 
@@ -34,4 +33,33 @@ Options:
   -h, --help             Print help
   -V, --version          Print version
 ```
+
+## Installation
+
+### From crates.io
+
+- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
+- Install `cmfy`:
+  ```
+  cargo install cmfy
+  ```
+
+### From source
+
+- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
+- Clone the repo:
+  ```
+  git clone https://github.com/meuter/cmfy
+  ```
+- Install `cmfy`:
+  ```
+  cd cmfy
+  cargo install --path .
+  ```
+
+### From Github Release
+
+- Download the prebuilt binaries from the [release](https://github.com/meuter/cmfy-rs/releases) page.
+
+
 
