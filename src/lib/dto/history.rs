@@ -78,7 +78,7 @@ impl IntoIterator for History {
     type IntoIter = IntoValues<String, HistoryLogEntry>;
 
     fn into_iter(self) -> Self::IntoIter {
-       self.0.into_values()
+        self.0.into_values()
     }
 }
 
