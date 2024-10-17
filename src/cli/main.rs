@@ -6,7 +6,7 @@ use clap::{
     Parser, Subcommand,
 };
 use cmfy::{Client, Result};
-use commands::{Cancel, Capture, Clear, Get, History, List, Open, Queue, Run, Stats, Submit, View};
+use commands::{Cancel, Capture, Clear, Get, History, List, Listen, Open, Queue, Run, Stats, Submit, View};
 
 pub fn build_styles() -> Styles {
     Styles::styled()
@@ -22,8 +22,14 @@ pub fn build_styles() -> Styles {
 #[command(styles=build_styles(), color=clap::ColorChoice::Always, infer_subcommands = true)]
 struct Cli {
     /// hostname of the server
-    #[arg(short, long, env = "COMFY_SERVER", value_name = "SERVER", default_value = "localhost")]
-    server: String,
+    #[arg(
+        short = 's',
+        long,
+        env = "COMFY_HOSTNAME",
+        value_name = "HOSTNAME",
+        default_value = "localhost"
+    )]
+    hostname: String,
 
     /// port of the server
     #[arg(short, long, env = "COMFY_PORT", value_name = "PORT", default_value_t = 8188)]
@@ -47,6 +53,7 @@ enum Command {
     Get(Get),
     Submit(Submit),
     View(View),
+    Listen(Listen),
 }
 
 impl Run for Command {
@@ -64,6 +71,7 @@ impl Run for Command {
             Get(cmd) => cmd.run(client).await,
             Submit(cmd) => cmd.run(client).await,
             View(cmd) => cmd.run(client).await,
+            Listen(cmd) => cmd.run(client).await,
         }
     }
 }
@@ -71,6 +79,6 @@ impl Run for Command {
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Cli::parse();
-    let client = Client::new(args.server, args.port);
+    let client = Client::from_hostname_port(args.hostname, args.port)?;
     args.command.run(client).await
 }
