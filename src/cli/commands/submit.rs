@@ -4,6 +4,9 @@ use clap::Args;
 use cmfy::dto;
 use colored::Colorize;
 
+// TODO: reseed
+// TODO: submit each multiple times
+
 /// Submits a batch of prompts to the server.
 ///
 /// Reads a batch of prompts from a JSON file and submits it

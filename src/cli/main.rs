@@ -50,9 +50,11 @@ enum Command {
     Clear(Clear),
     Open(Open),
     Capture(Capture),
-    Get(Get),
     Submit(Submit),
     View(View),
+    // TODO: group them in the help => Not supported by clap yet
+    // TODO: add a post?
+    Get(Get),
     Listen(Listen),
 }
 
