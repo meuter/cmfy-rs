@@ -1,11 +1,8 @@
 use super::Run;
 use crate::io::{Input, JsonRead};
 use clap::Args;
-use cmfy::dto;
+use cmfy::{dto, nodes::KSampler};
 use colored::Colorize;
-
-// TODO: reseed
-// TODO: submit each multiple times
 
 /// Submits a batch of prompts to the server.
 ///
@@ -16,15 +13,30 @@ pub struct Submit {
     /// Input file containing the prompts in json format
     #[clap(default_value = "-")]
     input: Input,
+
+    /// Reseeds the prompts before submission
+    /// (assumes a KSampler node)
+    #[clap(long, short, action, default_value_t = false)]
+    reseed: bool,
+
+    /// Allows to specify the number of times each prompt
+    /// will be submitted.
+    #[clap(long, short = 'n', action, default_value_t = 1)]
+    count: usize,
 }
 
 impl Run for Submit {
     async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
         let prompts: Vec<dto::PromptNodes> = self.input.read_json()?;
-        for prompt in &prompts {
-            let response = client.submit(prompt).await?;
-            let index = format!("[{}]", response.number.to_string().bright_blue());
-            println!("{:<15}{}", index, response.prompt_id);
+        for mut prompt in prompts {
+            if self.reseed {
+                prompt.reseed()?;
+            }
+            for _ in 0..self.count {
+                let response = client.submit(&prompt).await?;
+                let index = format!("[{}]", response.number.to_string().bright_blue());
+                println!("{:<15}{}", index, response.prompt_id);
+            }
         }
         Ok(())
     }
