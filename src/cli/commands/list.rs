@@ -1,7 +1,7 @@
 use super::Run;
 use clap::Args;
 
-use cmfy::{dto::Outputs, History, Prompt, Queue};
+use cmfy::{dto::Outputs, Client, Prompt, Result};
 use colored::Colorize;
 use itertools::Itertools;
 use std::{fmt::Display, iter::empty};
@@ -40,10 +40,42 @@ impl List {
             ..Self::default()
         }
     }
-}
 
-#[derive(Debug, Default, Clone)]
-pub struct PromptList(Vec<PromptListEntry>);
+    // TODO: consider moving this to the client struct?
+    pub async fn collect_entries(client: &Client, history: bool, queue: bool) -> Result<Vec<PromptListEntry>> {
+        use PromptStatus::*;
+
+        let mut entries = vec![];
+        if history {
+            let history = client.history().await?;
+            entries.extend(history.into_iter().map(|entry| {
+                let status = if entry.cancelled() { Cancelled } else { Completed };
+                let prompt = entry.prompt;
+                let outputs = Some(entry.outputs);
+                PromptListEntry { prompt, status, outputs }
+            }))
+        }
+        if queue {
+            let queue = client.queue().await?;
+            entries.extend(
+                empty()
+                    .chain(queue.running.into_iter().map(|prompt| PromptListEntry {
+                        prompt,
+                        status: PromptStatus::Running,
+                        outputs: None,
+                    }))
+                    .chain(queue.pending.into_iter().map(|prompt| PromptListEntry {
+                        prompt,
+                        status: PromptStatus::Pending,
+                        outputs: None,
+                    }))
+                    .collect_vec(),
+            );
+        }
+        entries.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
+        Ok(entries)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct PromptListEntry {
@@ -61,9 +93,7 @@ pub enum PromptStatus {
 }
 
 impl Run for List {
-    async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
-        use PromptStatus::*;
-
+    async fn run(mut self, client: cmfy::Client) -> Result<()> {
         if self.history || self.queue {
             self.all = false;
         }
@@ -72,44 +102,15 @@ impl Run for List {
             self.queue = true;
         }
 
-        let mut entries = vec![];
-        if self.history {
-            let history = client.history().await?;
-            entries.extend(history.into_iter().map(|entry| {
-                let status = if entry.cancelled() { Cancelled } else { Completed };
-                let prompt = entry.prompt;
-                let outputs = Some(entry.outputs);
-                PromptListEntry { prompt, status, outputs }
-            }))
-        }
-        if self.queue {
-            let queue = client.queue().await?;
-            entries.extend(
-                empty()
-                    .chain(queue.running.into_iter().map(|prompt| PromptListEntry {
-                        prompt,
-                        status: PromptStatus::Running,
-                        outputs: None,
-                    }))
-                    .chain(queue.pending.into_iter().map(|prompt| PromptListEntry {
-                        prompt,
-                        status: PromptStatus::Pending,
-                        outputs: None,
-                    }))
-                    .collect_vec(),
-            );
-        }
-
-        for entry in entries {
+        for entry in Self::collect_entries(&client, self.history, self.queue).await? {
             let prompt = entry.prompt;
             let index = format!("[{}]", prompt.index.to_string().bright_blue());
             print!("{:<15}{} ({})", index, prompt.uuid, entry.status);
             if self.images {
                 if let Some(outputs) = entry.outputs {
-                    for image in outputs.images() {
+                    if let Some(image) = outputs.images().next() {
                         let url = client.url_for_image(image)?.to_string();
                         print!(" -> {}", url.cyan().underline());
-                        break;
                     }
                 }
             }
@@ -128,68 +129,5 @@ impl Display for PromptStatus {
             Running => write!(f, "{}", "running".blue()),
             Cancelled => write!(f, "{}", "cancelled".red()),
         }
-    }
-}
-
-impl PromptList {
-    pub fn append(&mut self, other: &mut PromptList) {
-        self.0.append(&mut other.0);
-    }
-
-    pub fn into_prompts(self) -> impl Iterator<Item = Prompt> {
-        self.0.into_iter().map(|entry| entry.prompt)
-    }
-}
-
-impl IntoIterator for PromptList {
-    type Item = PromptListEntry;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(mut self) -> Self::IntoIter {
-        self.0.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
-        self.0.into_iter()
-    }
-}
-
-impl From<History> for PromptList {
-    fn from(history: History) -> Self {
-        use PromptStatus::*;
-        let entries = history
-            .into_iter()
-            .map(|entry| {
-                let status = if entry.cancelled() { Cancelled } else { Completed };
-                let prompt = entry.prompt;
-                let outputs = Some(entry.outputs);
-                PromptListEntry { prompt, status, outputs }
-            })
-            .collect_vec();
-        Self(entries)
-    }
-}
-
-impl From<Queue> for PromptList {
-    fn from(queue: Queue) -> Self {
-        let entries = empty()
-            .chain(queue.running.into_iter().map(|prompt| PromptListEntry {
-                prompt,
-                status: PromptStatus::Running,
-                outputs: None,
-            }))
-            .chain(queue.pending.into_iter().map(|prompt| PromptListEntry {
-                prompt,
-                status: PromptStatus::Pending,
-                outputs: None,
-            }))
-            .collect_vec();
-        Self(entries)
-    }
-}
-
-impl From<(History, Queue)> for PromptList {
-    fn from((history, queue): (History, Queue)) -> Self {
-        let mut entries = vec![];
-        entries.append(&mut PromptList::from(history).0);
-        entries.append(&mut PromptList::from(queue).0);
-        Self(entries)
     }
 }

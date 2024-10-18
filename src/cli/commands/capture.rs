@@ -1,6 +1,5 @@
+use super::{List, Run};
 use crate::io::JsonWrite;
-
-use super::{list::PromptList, Run};
 use clap::Args;
 use clio::Output;
 use itertools::Itertools;
@@ -43,20 +42,11 @@ impl Run for Capture {
             self.history = true;
         }
 
-        let mut list = PromptList::default();
-        if self.queue {
-            let queue = client.queue().await?;
-            list.append(&mut PromptList::from(queue));
-        }
-        if self.history {
-            let history = client.history().await?;
-            list.append(&mut PromptList::from(history));
-        }
-
         // NOTE: The history and queue return submitted prompts with UUID, index, and possibly
         //       output nodes. The goal of capturing the prompts is to submit them for which
         //       we do not need the submit information. We just need the prompt nodes.
-        let prompts = list.into_prompts().map(|prompt| prompt.nodes).collect_vec();
+        let entries = List::collect_entries(&client, self.history, self.queue).await?;
+        let prompts = entries.into_iter().map(|entries| entries.prompt.nodes).collect_vec();
         self.output.write_json(&prompts, self.pretty)?;
         Ok(())
     }
