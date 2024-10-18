@@ -1,3 +1,5 @@
+use crate::{MarkAs, WithStatus};
+
 use super::Prompt;
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -82,6 +84,9 @@ pub struct Metadata {
     pub real_node_id: String,
 }
 
+impl MarkAs for Prompt {}
+pub type PromptBatch = Vec<WithStatus<Prompt, Outputs>>;
+
 impl History {
     pub fn into_prompts(self) -> impl Iterator<Item = Prompt> {
         self.0.into_values().map(|entry| entry.prompt)
@@ -97,17 +102,13 @@ impl IntoIterator for History {
     }
 }
 
-impl HistoryLogEntry {
-    pub fn cancelled(&self) -> bool {
-        self.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped)
-    }
-
-    pub fn into_outputs(self) -> impl Iterator<Item = Output> {
-        self.outputs.0.into_values()
-    }
-
-    pub fn output_images(&self) -> impl Iterator<Item = &Image> {
-        self.outputs.images()
+impl From<HistoryLogEntry> for WithStatus<Prompt, Outputs> {
+    fn from(entry: HistoryLogEntry) -> Self {
+        if entry.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped) {
+            entry.prompt.mark_as(crate::Status::Cancelled)
+        } else {
+            entry.prompt.mark_as(crate::Status::Completed(entry.outputs))
+        }
     }
 }
 

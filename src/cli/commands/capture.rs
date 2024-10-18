@@ -46,7 +46,7 @@ impl Run for Capture {
         //       output nodes. The goal of capturing the prompts is to submit them for which
         //       we do not need the submit information. We just need the prompt nodes.
         let entries = List::collect_entries(&client, self.history, self.queue).await?;
-        let prompts = entries.into_iter().map(|entries| entries.prompt.nodes).collect_vec();
+        let prompts = entries.into_iter().map(|entries| entries.inner.nodes).collect_vec();
         self.output.write_json(&prompts, self.pretty)?;
         Ok(())
     }
