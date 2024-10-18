@@ -1,18 +1,23 @@
-use super::Run;
+use super::{List, Run};
 use clap::Args;
 
-/// Lists and optionally clears prompts from queue
+/// Manipulates the queue of pending prompts
 #[derive(Debug, Args)]
 pub struct Queue {
-    /// Clears all pending prompts from the queue after printing
+    /// Lists all pending prompts from queue
+    #[clap(long, short, action, default_value_t = false)]
+    list: bool,
+
+    /// Clears all pending prompts from queue
     #[clap(long, short, action, default_value_t = false)]
     clear: bool,
 }
 
 impl Run for Queue {
     async fn run(self, client: cmfy::Client) -> cmfy::Result<()> {
-        let queue = client.queue().await?;
-        super::list::PromptList::from(queue).display();
+        if self.list {
+            List::queue().run(client.clone()).await?;
+        }
         if self.clear {
             client.clear_queue().await?;
         }
