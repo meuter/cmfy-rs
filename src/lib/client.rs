@@ -118,7 +118,6 @@ impl Client {
 
     pub async fn submit(&self, nodes: &dto::PromptNodes) -> Result<dto::SubmitResponse> {
         let client_id = self.id.to_string();
-        println!("submitting client_id={}", client_id);
         let payload = serde_json::json!({
             "client_id": client_id,
             "prompt": nodes
