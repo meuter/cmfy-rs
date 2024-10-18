@@ -106,8 +106,10 @@ impl HistoryLogEntry {
         self.outputs.0.into_values()
     }
 
-    pub fn into_output_images(self) -> impl Iterator<Item = Image> {
-        self.into_outputs()
+    pub fn output_images(&self) -> impl Iterator<Item = &Image> {
+        self.outputs
+            .0
+            .values()
             .filter_map(|output| {
                 if let Output::Images { images } = output {
                     Some(images)
