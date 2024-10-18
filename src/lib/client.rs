@@ -1,4 +1,7 @@
-use crate::{dto, error::Result};
+use crate::{
+    dto::{self, PromptBatch},
+    error::Result,
+};
 use reqwest::Url;
 use ring::digest::{digest, SHA256};
 use serde::{de::DeserializeOwned, Serialize};
@@ -122,5 +125,19 @@ impl Client {
         });
         let response = self.post("prompt", &payload).await?;
         response.ok_or("invalid response".into())
+    }
+
+    pub async fn collect_prompt_batch(&self, history: bool, queue: bool) -> Result<PromptBatch> {
+        let mut batch = vec![];
+        if history {
+            let history = self.history().await?;
+            batch.extend(history.into_batch_entries())
+        }
+        if queue {
+            let queue = self.queue().await?;
+            batch.extend(queue.into_batch_entries())
+        }
+        batch.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
+        Ok(batch)
     }
 }

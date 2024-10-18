@@ -1,9 +1,8 @@
 use super::Run;
 use clap::Args;
 
-use cmfy::{dto::PromptBatch, Client, MarkAs, Result, Status};
+use cmfy::{Client, Result, Status};
 use colored::Colorize;
-use std::iter::empty;
 
 /// List all prompts from history and queue
 #[derive(Debug, Args, Default)]
@@ -32,27 +31,11 @@ impl List {
             ..Self::default()
         }
     }
-
     pub fn queue() -> Self {
         Self {
             queue: true,
             ..Self::default()
         }
-    }
-
-    // TODO: consider moving this to the client struct?
-    pub async fn collect_entries(client: &Client, history: bool, queue: bool) -> Result<PromptBatch> {
-        let mut batch = vec![];
-        if history {
-            let history = client.history().await?;
-            batch.extend(history.into_batch_entries())
-        }
-        if queue {
-            let queue = client.queue().await?;
-            batch.extend(queue.into_batch_entries())
-        }
-        batch.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
-        Ok(batch)
     }
 }
 
@@ -66,7 +49,7 @@ impl Run for List {
             self.queue = true;
         }
 
-        for entry in Self::collect_entries(&client, self.history, self.queue).await? {
+        for entry in client.collect_prompt_batch(self.history, self.queue).await? {
             let prompt = entry.inner;
             let index = format!("[{}]", prompt.index.to_string().bright_blue());
             print!("{:<15}{} ({})", index, prompt.uuid, entry.status);
