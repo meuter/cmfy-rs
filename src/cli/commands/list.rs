@@ -1,10 +1,9 @@
 use super::Run;
 use clap::Args;
 
-use cmfy::{dto::Outputs, Client, Prompt, Result};
+use cmfy::{Client, PromptAndStatus, Result, Status};
 use colored::Colorize;
-use itertools::Itertools;
-use std::{fmt::Display, iter::empty};
+use std::iter::empty;
 
 /// List all prompts from history and queue
 #[derive(Debug, Args, Default)]
@@ -42,54 +41,29 @@ impl List {
     }
 
     // TODO: consider moving this to the client struct?
-    pub async fn collect_entries(client: &Client, history: bool, queue: bool) -> Result<Vec<PromptListEntry>> {
-        use PromptStatus::*;
-
+    pub async fn collect_entries(client: &Client, history: bool, queue: bool) -> Result<Vec<PromptAndStatus>> {
         let mut entries = vec![];
         if history {
             let history = client.history().await?;
             entries.extend(history.into_iter().map(|entry| {
-                let status = if entry.cancelled() { Cancelled } else { Completed };
-                let prompt = entry.prompt;
-                let outputs = Some(entry.outputs);
-                PromptListEntry { prompt, status, outputs }
+                if entry.cancelled() {
+                    PromptAndStatus::cancelled(entry.prompt)
+                } else {
+                    PromptAndStatus::completed(entry.prompt, entry.outputs)
+                }
             }))
         }
         if queue {
             let queue = client.queue().await?;
             entries.extend(
                 empty()
-                    .chain(queue.running.into_iter().map(|prompt| PromptListEntry {
-                        prompt,
-                        status: PromptStatus::Running,
-                        outputs: None,
-                    }))
-                    .chain(queue.pending.into_iter().map(|prompt| PromptListEntry {
-                        prompt,
-                        status: PromptStatus::Pending,
-                        outputs: None,
-                    }))
-                    .collect_vec(),
+                    .chain(queue.running.into_iter().map(PromptAndStatus::running))
+                    .chain(queue.pending.into_iter().map(PromptAndStatus::pending)),
             );
         }
         entries.sort_by(|l, r| l.prompt.index.cmp(&r.prompt.index));
         Ok(entries)
     }
-}
-
-#[derive(Debug, Clone)]
-pub struct PromptListEntry {
-    pub prompt: Prompt,
-    pub status: PromptStatus,
-    pub outputs: Option<Outputs>,
-}
-
-#[derive(Debug, Clone)]
-pub enum PromptStatus {
-    Completed,
-    Pending,
-    Running,
-    Cancelled,
 }
 
 impl Run for List {
@@ -107,7 +81,7 @@ impl Run for List {
             let index = format!("[{}]", prompt.index.to_string().bright_blue());
             print!("{:<15}{} ({})", index, prompt.uuid, entry.status);
             if self.images {
-                if let Some(outputs) = entry.outputs {
+                if let Status::Completed(outputs) = entry.status {
                     if let Some(image) = outputs.images().next() {
                         let url = client.url_for_image(image)?.to_string();
                         print!(" -> {}", url.cyan().underline());
@@ -117,17 +91,5 @@ impl Run for List {
             println!();
         }
         Ok(())
-    }
-}
-
-impl Display for PromptStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use PromptStatus::*;
-        match self {
-            Completed => write!(f, "{}", "completed".green()),
-            Pending => write!(f, "{}", "pending".yellow()),
-            Running => write!(f, "{}", "running".blue()),
-            Cancelled => write!(f, "{}", "cancelled".red()),
-        }
     }
 }
