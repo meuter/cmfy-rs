@@ -2,6 +2,7 @@ use crate::{MarkAs, WithStatus};
 
 use super::Prompt;
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::{btree_map::IntoValues, BTreeMap};
 
@@ -85,30 +86,38 @@ pub struct Metadata {
 }
 
 impl MarkAs for Prompt {}
-pub type PromptBatch = Vec<WithStatus<Prompt, Outputs>>;
+pub type PromptBatchEntry = WithStatus<Prompt, Outputs>;
+pub type PromptBatch = Vec<PromptBatchEntry>;
 
 impl History {
-    pub fn into_prompts(self) -> impl Iterator<Item = Prompt> {
-        self.0.into_values().map(|entry| entry.prompt)
+    pub fn into_batch_entries(self) -> impl Iterator<Item = PromptBatchEntry> {
+        self.into_iter().map(|entry| entry.into())
     }
 }
 
 impl IntoIterator for History {
     type Item = HistoryLogEntry;
     type IntoIter = IntoValues<String, HistoryLogEntry>;
-
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_values()
     }
 }
 
-impl From<HistoryLogEntry> for WithStatus<Prompt, Outputs> {
+impl From<HistoryLogEntry> for PromptBatchEntry {
     fn from(entry: HistoryLogEntry) -> Self {
         if entry.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped) {
             entry.prompt.mark_as(crate::Status::Cancelled)
         } else {
             entry.prompt.mark_as(crate::Status::Completed(entry.outputs))
         }
+    }
+}
+
+impl From<History> for PromptBatch {
+    fn from(history: History) -> Self {
+        let mut result = history.into_batch_entries().collect_vec();
+        result.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
+        result
     }
 }
 

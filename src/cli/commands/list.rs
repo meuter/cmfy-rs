@@ -42,26 +42,22 @@ impl List {
 
     // TODO: consider moving this to the client struct?
     pub async fn collect_entries(client: &Client, history: bool, queue: bool) -> Result<PromptBatch> {
-        let mut entries = vec![];
+        let mut batch = vec![];
         if history {
             let history = client.history().await?;
-            entries.extend(history.into_iter().map(|entry| entry.into()))
+            batch.extend(history.into_batch_entries())
         }
         if queue {
             let queue = client.queue().await?;
-            entries.extend(
-                empty()
-                    .chain(queue.running.into_iter().map(|prompt| prompt.mark_as(Status::Running)))
-                    .chain(queue.pending.into_iter().map(|prompt| prompt.mark_as(Status::Pending))),
-            );
+            batch.extend(queue.into_batch_entries())
         }
-        entries.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
-        Ok(entries)
+        batch.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
+        Ok(batch)
     }
 }
 
 impl Run for List {
-    async fn run(mut self, client: cmfy::Client) -> Result<()> {
+    async fn run(mut self, client: Client) -> Result<()> {
         if self.history || self.queue {
             self.all = false;
         }
