@@ -1,6 +1,7 @@
 mod cancel;
 mod capture;
 mod clear;
+mod extract;
 mod get;
 mod history;
 mod list;
@@ -14,6 +15,7 @@ mod view;
 pub use cancel::Cancel;
 pub use capture::Capture;
 pub use clear::Clear;
+pub use extract::Extract;
 pub use get::Get;
 pub use history::History;
 pub use list::List;

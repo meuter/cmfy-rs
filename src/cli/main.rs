@@ -6,7 +6,7 @@ use clap::{
     Parser, Subcommand,
 };
 use cmfy::{Client, Result};
-use commands::{Cancel, Capture, Clear, Get, History, List, Listen, Open, Queue, Run, Stats, Submit, View};
+use commands::*;
 
 pub fn build_styles() -> Styles {
     Styles::styled()
@@ -56,6 +56,7 @@ enum Command {
     // TODO: add a post?
     Get(Get),
     Listen(Listen),
+    Extract(Extract),
 }
 
 impl Run for Command {
@@ -74,6 +75,7 @@ impl Run for Command {
             Submit(cmd) => cmd.run(client).await,
             View(cmd) => cmd.run(client).await,
             Listen(cmd) => cmd.run(client).await,
+            Extract(cmd) => cmd.run(client).await,
         }
     }
 }
