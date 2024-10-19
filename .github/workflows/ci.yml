@@ -91,11 +91,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete "latest" \
+          gh release delete "ci" \
               --cleanup-tag \
               --yes \
               || echo "Release does not exist yet"
-          gh release create "latest" \
+          gh release create "ci" \
               -F CHANGELOG.md \
               --prerelease \
               dist/*
