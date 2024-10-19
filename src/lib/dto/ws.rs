@@ -10,7 +10,10 @@ pub enum Message {
     Progress(Contents<Progress>),
     Executing(Contents<Executing>),
     Executed(Contents<Executed>),
-    ExecutionSuccess(Contents<ExecutionSuccess>),
+    ExecutionStart(Contents<ExecutionStepData>),
+    ExecutionSuccess(Contents<ExecutionStepData>),
+    ExecutionCached(Contents<ExecutionStepData>),
+    ExecutionInterrupted(Contents<ExecutionStepData>),
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -38,7 +41,7 @@ pub struct Progress {
     pub value: usize,
     pub max: usize,
     pub prompt_id: String,
-    pub node: String,
+    pub node: Option<String>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -46,13 +49,6 @@ pub struct Executing {
     pub node: Option<String>,
     pub display_node: Option<String>,
     pub prompt_id: Option<String>,
-}
-
-#[derive(Deserialize, Clone, Debug)]
-pub struct ExecutionSuccess {
-    pub prompt_id: String,
-    #[serde(with = "ts_milliseconds")]
-    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -66,4 +62,13 @@ pub struct Executed {
 #[derive(Deserialize, Clone, Debug)]
 pub struct Outputs {
     pub images: Vec<Image>,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct ExecutionStepData {
+    pub prompt_id: String,
+    #[serde(with = "ts_milliseconds")]
+    pub timestamp: DateTime<Utc>,
+    #[serde(default)]
+    pub nodes: Vec<String>,
 }
