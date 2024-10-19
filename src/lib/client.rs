@@ -4,33 +4,18 @@ use crate::{
     websocket::MessageStream,
 };
 use reqwest::Url;
-use ring::digest::{digest, SHA256};
 use serde::{de::DeserializeOwned, Serialize};
-use uuid::Uuid;
 
 #[derive(Clone, Debug)]
 pub struct Client {
     client: reqwest::Client,
     pub hostname: String,
     pub port: u32,
-    pub id: Uuid,
+    pub id: String,
 }
 
 impl Client {
-    pub fn from_hostname_port(hostname: impl AsRef<str>, port: u32) -> Result<Self> {
-        // NOTE: When opening a websocket to the server, we only recieve progress
-        //       messages from prompts submitted with the same client id as the one
-        //       provided in the post message.
-        //       Since this is a CLI app, we need a consistent client id accross
-        //       multiple invocation. So we take the full absolute path of the
-        //       current executable as a basis to generate a Uuid.
-        let full_executable_path = std::env::current_exe()?;
-        let hash = digest(&SHA256, full_executable_path.as_os_str().as_encoded_bytes());
-        let client_id = Uuid::from_slice(&hash.as_ref()[0..16])?;
-        Ok(Self::new(hostname, port, client_id))
-    }
-
-    fn new(hostname: impl AsRef<str>, port: u32, id: Uuid) -> Self {
+    pub fn new(hostname: impl AsRef<str>, port: u32, id: String) -> Self {
         let server = hostname.as_ref().to_string();
         let client = reqwest::Client::new();
         Self {
