@@ -7,6 +7,7 @@ use clap::{
 };
 use cmfy::{Client, Result};
 use commands::*;
+use enum_dispatch::enum_dispatch;
 
 pub fn build_styles() -> Styles {
     Styles::styled()
@@ -41,6 +42,7 @@ struct Cli {
 }
 
 #[derive(Subcommand, Debug)]
+#[enum_dispatch(Run)]
 enum Command {
     Stats(Stats),
     History(History),
@@ -52,32 +54,10 @@ enum Command {
     Capture(Capture),
     Submit(Submit),
     View(View),
-    // TODO: group them in the help => Not supported by clap yet
     // TODO: add a post?
     Get(Get),
     Listen(Listen),
     Extract(Extract),
-}
-
-impl Run for Command {
-    async fn run(self, client: Client) -> Result<()> {
-        use Command::*;
-        match self {
-            Stats(cmd) => cmd.run(client).await,
-            History(cmd) => cmd.run(client).await,
-            Queue(cmd) => cmd.run(client).await,
-            List(cmd) => cmd.run(client).await,
-            Cancel(cmd) => cmd.run(client).await,
-            Clear(cmd) => cmd.run(client).await,
-            Open(cmd) => cmd.run(client).await,
-            Capture(cmd) => cmd.run(client).await,
-            Get(cmd) => cmd.run(client).await,
-            Submit(cmd) => cmd.run(client).await,
-            View(cmd) => cmd.run(client).await,
-            Listen(cmd) => cmd.run(client).await,
-            Extract(cmd) => cmd.run(client).await,
-        }
-    }
 }
 
 #[tokio::main]

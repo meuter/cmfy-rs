@@ -27,7 +27,9 @@ pub use submit::Submit;
 pub use view::View;
 
 use cmfy::{Client, Result};
+use enum_dispatch::enum_dispatch;
 
+#[enum_dispatch]
 pub trait Run {
     async fn run(self, client: Client) -> Result<()>;
 }
