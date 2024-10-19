@@ -3,6 +3,8 @@ use crate::io::{Input, JsonWrite, Output};
 use clap::Args;
 use cmfy::{dto::PromptNodes, Client, Result};
 
+/// Extracts prompt information from a PNG generated
+/// with Comfy UI, and outputs it as JSON.
 #[derive(Debug, Args)]
 pub struct Extract {
     /// Input file containing the prompts in json format

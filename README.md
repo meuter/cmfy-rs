@@ -10,28 +10,32 @@ A CLI companion app for Comfy UI
 
 ## Usage
 
+`cmfy` provides several commands:
+
 ```
 Usage: cmfy [OPTIONS] <COMMAND>
 
 Commands:
-  stats    Displays basic statistics about the server
-  history  Lists and optionally clears prompts from history
-  queue    Lists and optionally clears prompts from queue
+  stats    Displays basic statistics about client and server
+  history  Manipulates history of prompts
+  queue    Manipulates the queue of pending prompts
   list     List all prompts from history and queue
   cancel   Cancel currently running prompt
   clear    Clear all prompts from history, queue and currently running prompt
   open     Open ComfyUI in a web browser
   capture  Capture running and pending prompt to file
-  get      Display GET request raw json output
   submit   Submits a batch of prompts to the server
   view     Open images from completed prompts in a browser
+  get      Display GET request raw json output
+  listen   Opens a websocket connection to the server, listens for messages and displays them as JSON on the console
+  extract  Extracts prompt information from a PNG generated with Comfy UI, and outputs it as JSON
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-  -s, --server <SERVER>  hostname of the server [env: COMFY_SERVER=] [default: localhost]
-  -p, --port <PORT>      port of the server [env: COMFY_PORT=] [default: 8188]
-  -h, --help             Print help
-  -V, --version          Print version
+  -s, --hostname <HOSTNAME>  hostname of the server [env: COMFY_HOSTNAME=172.24.80.1] [default: localhost]
+  -p, --port <PORT>          port of the server [env: COMFY_PORT=] [default: 8188]
+  -h, --help                 Print help
+  -V, --version              Print version
 ```
 
 ## Installation
