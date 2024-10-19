@@ -22,6 +22,7 @@ impl ClassType for KSamplerNode {
 
 pub trait KSampler {
     fn reseed(&mut self) -> Result<()>;
+    fn steps(&self) -> Result<u8>;
 }
 
 impl KSampler for PromptNodes {
@@ -29,5 +30,10 @@ impl KSampler for PromptNodes {
         self.change_first_by_class(|sampler: &mut KSamplerNode| {
             sampler.seed = rand::random();
         })
+    }
+
+    fn steps(&self) -> Result<u8> {
+        let (_, sampler) = self.first_by_class::<KSamplerNode>()?;
+        Ok(sampler.steps)
     }
 }
