@@ -6,6 +6,7 @@ pub use clio::{Input, Output};
 
 pub trait JsonWrite {
     fn write_json(&mut self, value: &impl Serialize, pretty: bool) -> Result<()>;
+    fn writeln(&mut self) -> Result<()>;
 }
 
 impl JsonWrite for Output {
@@ -16,6 +17,13 @@ impl JsonWrite for Output {
         } else {
             serde_json::to_writer(&mut writer, &value)?;
         }
+        writer.flush()?;
+        Ok(())
+    }
+
+    fn writeln(&mut self) -> Result<()> {
+        let mut writer = self.lock();
+        writer.write_all("\n".as_bytes())?;
         writer.flush()?;
         Ok(())
     }

@@ -1,6 +1,7 @@
 use crate::{
     dto::{self, PromptBatch},
     error::Result,
+    websocket::MessageStream,
 };
 use reqwest::Url;
 use ring::digest::{digest, SHA256};
@@ -138,5 +139,10 @@ impl Client {
         }
         batch.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
         Ok(batch)
+    }
+
+    pub async fn listen(&self) -> Result<MessageStream> {
+        let address = format!("ws://{}:{}/ws?clientId={}", self.hostname, self.port, self.id);
+        MessageStream::open(address).await
     }
 }
