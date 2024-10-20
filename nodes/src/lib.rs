@@ -17,3 +17,12 @@ pub struct KSamplerInputs {
     seed: u64
 }
 
+
+#[derive(Debug, Clone, Serialize, Deserialize, Node)]
+#[node(class_type = "EmptyLatentImage")]
+pub struct EmptyLatentImageInputs {
+    pub batch_size: u8,
+    pub height: usize,
+    pub width: usize,
+}
+
