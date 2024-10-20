@@ -1,7 +1,6 @@
 // TODO: cleanup
 #![allow(unused)]
 
-use convert_case::{Case, Casing};
 use darling::{ast::Data, FromDeriveInput, FromField};
 use proc_macro::TokenStream;
 use proc_macro2::Span;

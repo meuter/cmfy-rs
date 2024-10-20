@@ -146,9 +146,9 @@ checksum = "428d9aa8fbc0670b7b8d6030a7fadd0f86151cae55e4dbbece15f3780a3dfaf3"
 
 [[package]]
 name = "cc"
-version = "1.1.30"
+version = "1.1.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b16803a61b81d9eabb7eae2588776c4c1e584b738ede45fdbb4c972cec1e9945"
+checksum = "c2e7962b54006dcfcc61cb72735f4d89bb97061dd6a7ed882ec6b8ee53714c6f"
 dependencies = [
  "shlex",
 ]
@@ -231,16 +231,31 @@ dependencies = [
 
 [[package]]
 name = "cmfy"
-version = "0.3.0-wip"
+version = "0.1.0"
 dependencies = [
  "chrono",
- "clap",
- "clio",
- "cmfy_macros",
- "colored",
- "enum_dispatch",
  "futures-util",
  "http",
+ "itertools",
+ "rand",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_urlencoded",
+ "tokio",
+ "tokio-websockets",
+]
+
+[[package]]
+name = "cmfy-cli"
+version = "0.3.0-wip"
+dependencies = [
+ "clap",
+ "clio",
+ "cmfy",
+ "cmfy-nodes",
+ "colored",
+ "enum_dispatch",
  "humansize",
  "humantime",
  "itertools",
@@ -248,22 +263,17 @@ dependencies = [
  "png",
  "rand",
  "range-parser",
- "reqwest",
  "ring",
  "serde",
  "serde_json",
- "serde_urlencoded",
- "size",
  "tokio",
- "tokio-websockets",
  "uuid",
 ]
 
 [[package]]
-name = "cmfy_macros"
+name = "cmfy-macros"
 version = "0.1.0"
 dependencies = [
- "convert_case",
  "darling",
  "proc-macro2",
  "quote",
@@ -271,11 +281,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "cmfy_nodes"
+name = "cmfy-nodes"
 version = "0.1.0"
 dependencies = [
  "cmfy",
- "cmfy_macros",
+ "cmfy-macros",
  "serde",
 ]
 
@@ -293,15 +303,6 @@ checksum = "cbf2150cce219b664a8a70df7a1f933836724b503f8a413af9365b4dcc4d90b8"
 dependencies = [
  "lazy_static",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "convert_case"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
-dependencies = [
- "unicode-segmentation",
 ]
 
 [[package]]
@@ -1169,7 +1170,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fbb44d7acc4e873d613422379f69f237a1b141928c02f6bc6ccfddddc2d7993"
 dependencies = [
  "once_cell",
- "ring",
  "rustls-pki-types",
  "rustls-webpki",
  "subtle",
@@ -1306,12 +1306,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
-name = "size"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fed904c7fb2856d868b92464fc8fa597fce366edea1a9cbfaa8cb5fe080bd6d"
-
-[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1356,9 +1350,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.79"
+version = "2.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89132cd0bf050864e1d38dc3bbc07a0eb8e7530af26344d3d2bbbef83499f590"
+checksum = "198514704ca887dd5a1e408c6c6cdcba43672f9b4062e1b24aa34e74e6d7faae"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1512,15 +1506,13 @@ checksum = "f591660438b3038dd04d16c938271c79e7e06260ad2ea2885a4861bfb238605d"
 dependencies = [
  "base64",
  "bytes",
- "fastrand",
  "futures-core",
  "futures-sink",
  "http",
  "httparse",
- "ring",
+ "openssl",
+ "rand",
  "tokio",
- "tokio-native-tls",
- "tokio-rustls",
  "tokio-util",
 ]
 
@@ -1577,12 +1569,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "unicode-segmentation"
-version = "1.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6ccf251212114b54433ec949fd6a7841275f9ada20dddd2f29e9ceea4501493"
-
-[[package]]
 name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1610,9 +1596,6 @@ name = "uuid"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8c5f0a0af699448548ad1a2fbf920fb4bee257eae39953ba95cb84891a0446a"
-dependencies = [
- "getrandom",
-]
 
 [[package]]
 name = "vcpkg"

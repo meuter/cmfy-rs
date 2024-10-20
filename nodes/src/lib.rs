@@ -9,3 +9,11 @@ pub struct LoraLoaderInputs {
     pub strength_model: f32,
 }
 
+
+#[derive(Debug, Clone, Serialize, Deserialize, Node)]
+#[node(class_type = "KSampler")]
+pub struct KSamplerInputs {
+    steps: u8,
+    seed: u64
+}
+

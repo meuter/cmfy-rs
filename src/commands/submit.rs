@@ -1,7 +1,8 @@
 use super::Run;
 use crate::io::{Input, JsonRead};
 use clap::Args;
-use cmfy::{dto, nodes::KSampler};
+use cmfy::{Result, Client, dto};
+use cmfy_nodes::KSampler;
 use colored::Colorize;
 
 /// Submits a batch of prompts to the server.
@@ -26,11 +27,11 @@ pub struct Submit {
 }
 
 impl Run for Submit {
-    async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
+    async fn run(mut self, client: Client) -> Result<()> {
         let prompts: Vec<dto::PromptNodes> = self.input.read_json()?;
         for mut prompt in prompts {
             if self.reseed {
-                prompt.reseed()?;
+                prompt.set_seed(&rand::random())?;
             }
             for _ in 0..self.count {
                 let response = client.submit(&prompt).await?;

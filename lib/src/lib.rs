@@ -4,7 +4,6 @@ mod status;
 mod websocket;
 
 pub mod dto;
-pub mod nodes;
 
 pub use client::Client;
 pub use dto::{History, Prompt, Queue, SystemStats};

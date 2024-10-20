@@ -3,7 +3,7 @@ mod prompt;
 mod queue;
 mod stats;
 
-pub mod ws;
+pub mod websocket;
 
 pub use history::*;
 pub use prompt::*;

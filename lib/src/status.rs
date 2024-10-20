@@ -1,5 +1,3 @@
-use colored::Colorize;
-
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone)]
@@ -30,10 +28,10 @@ impl<O> Display for Status<O> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         use Status::*;
         match self {
-            Completed(_) => write!(f, "{}", "completed".green()),
-            Pending => write!(f, "{}", "pending".yellow()),
-            Running => write!(f, "{}", "running".blue()),
-            Cancelled => write!(f, "{}", "cancelled".red()),
+            Completed(_) => write!(f, "{}", "completed"),
+            Pending => write!(f, "{}", "pending"),
+            Running => write!(f, "{}", "running"),
+            Cancelled => write!(f, "{}", "cancelled"),
         }
     }
 }
