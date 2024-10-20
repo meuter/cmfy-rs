@@ -287,6 +287,7 @@ dependencies = [
  "cmfy",
  "cmfy-macros",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
