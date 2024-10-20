@@ -20,8 +20,8 @@ members = ["nodes", "macros", "lib"]
 [dependencies]
 clap = { version = "4.5.20", features = ["derive", "env"] }
 clio = { version = "0.3.5", features = ["clap", "clap-parse"] }
-cmfy = { version = "0.1.0", path = "lib" }
-cmfy-nodes = { version = "0.1.0", path = "nodes" }
+cmfy = { version = "0.3.0-wip", path = "lib" }
+cmfy-nodes = { version = "0.3.0-wip", path = "nodes" }
 colored = "2.1.0"
 enum_dispatch = "0.3.13"
 humansize = "2.1.3"
