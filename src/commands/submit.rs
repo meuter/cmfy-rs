@@ -31,7 +31,7 @@ impl Run for Submit {
         let prompts: Vec<dto::PromptNodes> = self.input.read_json()?;
         for mut prompt in prompts {
             if self.reseed {
-                prompt.set_seed(&rand::random())?;
+                prompt.set_seed(rand::random())?;
             }
             for _ in 0..self.count {
                 let response = client.submit(&prompt).await?;

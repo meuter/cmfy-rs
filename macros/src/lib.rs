@@ -78,7 +78,7 @@ pub fn derive_node(input: TokenStream) -> TokenStream {
         let set_field_name = field.setter_ident();
         quote!(
             fn #get_field_name(&self) -> ::cmfy::Result<#field_type>;
-            fn #set_field_name(&mut self, value: &#field_type) -> ::cmfy::Result<()>;
+            fn #set_field_name(&mut self, value: #field_type) -> ::cmfy::Result<()>;
         )
     });
 
@@ -92,8 +92,8 @@ pub fn derive_node(input: TokenStream) -> TokenStream {
                 let (_, node) = self.first_by_class::<#node_ident>()?;
                 Ok(node.#field_name)
             }
-            fn #set_field_name(&mut self, value: &#field_type) -> ::cmfy::Result<()> {
-                self.change_first_by_class(|node: &mut #node_ident| {
+            fn #set_field_name(&mut self, value: #field_type) -> ::cmfy::Result<()> {
+                self.change_first_by_class(move |node: &mut #node_ident| {
                     node.#field_name = value.clone();
                 })
             }
