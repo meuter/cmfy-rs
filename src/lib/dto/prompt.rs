@@ -28,7 +28,7 @@ pub struct SubmitResponse {
     pub node_errors: serde_json::Value,
 }
 
-pub trait ClassType: Serialize {
+pub trait ClassType {
     const CLASS_TYPE: &str;
 }
 
@@ -74,7 +74,7 @@ impl PromptNodes {
 
     pub fn change_first_by_class<N, C>(&mut self, change: C) -> Result<()>
     where
-        N: DeserializeOwned + Serialize + ClassType + std::fmt::Debug,
+        N: DeserializeOwned + Serialize + ClassType,
         C: Fn(&mut N),
     {
         let (id, mut node) = self.first_by_class()?;

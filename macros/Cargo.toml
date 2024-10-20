@@ -1,0 +1,15 @@
+[package]
+name = "cmfy_macros"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+convert_case = "0.6.0"
+darling = "0.20.10"
+proc-macro2 = "1.0.88"
+quote = "1.0.37"
+syn = "2.0.79"
+
+[lib]
+path = "src/lib.rs"
+proc-macro = true

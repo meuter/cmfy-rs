@@ -29,10 +29,10 @@ impl Run for Submit {
     async fn run(mut self, client: cmfy::Client) -> cmfy::Result<()> {
         let prompts: Vec<dto::PromptNodes> = self.input.read_json()?;
         for mut prompt in prompts {
+            if self.reseed {
+                prompt.reseed()?;
+            }
             for _ in 0..self.count {
-                if self.reseed {
-                    prompt.reseed()?;
-                }
                 let response = client.submit(&prompt).await?;
                 let index = format!("[{}]", response.number.to_string().bright_blue());
                 println!("{:<15}{}", index, response.prompt_id);

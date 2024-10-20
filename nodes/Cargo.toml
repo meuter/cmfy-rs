@@ -1,0 +1,9 @@
+[package]
+name = "cmfy_nodes"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cmfy = { version = "0.3.0-wip", path = ".." }
+cmfy_macros = { version = "0.1.0", path = "../macros" }
+serde = { version = "1.0.210", features = ["derive"] }
