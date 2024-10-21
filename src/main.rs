@@ -67,6 +67,7 @@ enum Command {
     Listen(Listen),
     Extract(Extract),
     Monitor(Monitor),
+    Download(Download),
 }
 
 fn compute_own_client_id() -> String {

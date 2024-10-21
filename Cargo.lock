@@ -265,6 +265,7 @@ dependencies = [
  "png",
  "rand",
  "range-parser",
+ "reqwest",
  "ring",
  "serde",
  "serde_json",
