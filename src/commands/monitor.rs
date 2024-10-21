@@ -7,6 +7,7 @@ use cmfy::{
 use cmfy_nodes::KSampler;
 use colored::Colorize;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use itertools::Itertools;
 use std::{collections::HashMap, time::Duration};
 
 #[derive(Debug, Clone, Args)]
@@ -19,10 +20,17 @@ pub struct PromptProgressBars {
 }
 
 impl PromptProgressBars {
-    pub fn from_client(client: Client) -> Self {
+    pub async fn from_client(client: Client) -> Result<Self> {
         let multi = MultiProgress::new();
         let by_id = HashMap::new();
-        Self { multi, by_id, client }
+        let mut bars = Self { multi, by_id, client };
+
+        let entries = bars.client.collect_prompt_batch(true, true).await?;
+        for entry in entries {
+            bars.register_prompt(&entry.inner)?;
+            bars.set_status(&entry.inner.uuid, entry.status)?;
+        }
+        Ok(bars)
     }
 
     pub fn set_status(&mut self, prompt_id: impl AsRef<str>, status: Status<Outputs>) -> Result<()> {
@@ -75,49 +83,73 @@ impl PromptProgressBars {
         self.by_id.insert(prompt.uuid.clone(), bar);
         Ok(())
     }
+
+    pub async fn refresh_history_and_queue(&mut self) -> Result<()> {
+        let entries = self.client.collect_prompt_batch(true, true).await?;
+
+        // NOTE: the bar for prompts that are not in the batch anymore should be removed
+        let to_remove = self
+            .by_id
+            .keys()
+            .filter(|prompt_id| !entries.iter().any(|entry| entry.inner.uuid == **prompt_id))
+            .map(String::clone)
+            .collect_vec();
+
+        for prompt_id in to_remove {
+            let bar = self.by_id.remove(&prompt_id).unwrap();
+            bar.finish_and_clear();
+            self.multi.remove(&bar);
+        }
+
+        // NOTE: prompt from the batch that are not registered yet should be
+        for entry in entries {
+            if !self.by_id.keys().any(|prompt_id| entry.inner.uuid == *prompt_id) {
+                self.register_prompt(&entry.inner)?;
+                self.set_status(&entry.inner.uuid, entry.status)?;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Run for Monitor {
     async fn run(self, client: Client) -> Result<()> {
-        let mut bars = PromptProgressBars::from_client(client.clone());
+        let mut bars = PromptProgressBars::from_client(client.clone()).await?;
+        let mut stream = client.listen().await?;
+        let timeout = Duration::from_millis(500);
 
-        let entries = client.collect_prompt_batch(true, true).await?;
-        for entry in entries {
-            let prompt = entry.inner;
-            let status = entry.status;
-            bars.register_prompt(&prompt)?;
-            bars.set_status(&prompt.uuid, status)?;
-        }
-
-        let mut message_stream = client.listen().await?;
-        while let Some(message) = message_stream.next_json::<Message>().await? {
-            match message {
-                Message::Status(_contents) => {}
-                Message::Progress(contents) => {
-                    bars.set_status(&contents.data.prompt_id, Status::Running)?;
-                    bars.set_position(&contents.data.prompt_id, contents.data.value)?;
-                }
-                Message::Executing(_contents) => {}
-                Message::Executed(_contents) => {}
-                Message::ExecutionStart(contents) => {
-                    bars.set_position(&contents.data.prompt_id, 0)?;
-                    bars.set_status(&contents.data.prompt_id, Status::Running)?;
-                }
-                Message::ExecutionSuccess(contents) => {
-                    //
-                    for entry in client.collect_prompt_batch(true, false).await? {
-                        if entry.inner.uuid == contents.data.prompt_id {
-                            bars.set_status(&contents.data.prompt_id, entry.status)?;
+        loop {
+            match stream.next_json_with_timeout(timeout).await {
+                Ok(Ok(Some(message))) => match message {
+                    Message::Status(_contents) => {}
+                    Message::Progress(contents) => {
+                        bars.set_status(&contents.data.prompt_id, Status::Running)?;
+                        bars.set_position(&contents.data.prompt_id, contents.data.value)?;
+                    }
+                    Message::Executing(_contents) => {}
+                    Message::Executed(_contents) => {}
+                    Message::ExecutionStart(contents) => {
+                        bars.set_position(&contents.data.prompt_id, 0)?;
+                        bars.set_status(&contents.data.prompt_id, Status::Running)?;
+                    }
+                    Message::ExecutionSuccess(contents) => {
+                        for entry in client.collect_prompt_batch(true, false).await? {
+                            if entry.inner.uuid == contents.data.prompt_id {
+                                bars.set_status(&contents.data.prompt_id, entry.status)?;
+                            }
                         }
                     }
-                }
-                Message::ExecutionCached(_contents) => {}
-                Message::ExecutionInterrupted(contents) => {
-                    //
-                    bars.set_status(&contents.data.prompt_id, Status::Cancelled)?;
+                    Message::ExecutionCached(_contents) => {}
+                    Message::ExecutionInterrupted(contents) => {
+                        bars.set_status(&contents.data.prompt_id, Status::Cancelled)?;
+                    }
+                },
+                Ok(Ok(None)) => return Ok(()),
+                Ok(Err(error)) => return Err(error),
+                Err(_) => {
+                    bars.refresh_history_and_queue().await?;
                 }
             }
         }
-        Ok(())
     }
 }

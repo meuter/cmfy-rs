@@ -1,6 +1,3 @@
-// TODO: cleanup
-#![allow(unused)]
-
 use darling::{ast::Data, FromDeriveInput, FromField};
 use proc_macro::TokenStream;
 use proc_macro2::Span;

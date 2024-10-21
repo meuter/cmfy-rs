@@ -1,13 +1,17 @@
+use std::time::Duration;
+
 use crate::Result;
 use futures_util::StreamExt;
 use http::Uri;
 use serde::de::DeserializeOwned;
-use tokio::net::TcpStream;
+use tokio::{net::TcpStream, time::error::Elapsed};
 use tokio_websockets::{MaybeTlsStream, WebSocketStream};
 
 pub struct MessageStream {
     websocket: WebSocketStream<MaybeTlsStream<TcpStream>>,
 }
+
+pub type MaybeTimeout<T> = std::result::Result<T, Elapsed>;
 
 impl MessageStream {
     pub fn new(websocket: WebSocketStream<MaybeTlsStream<TcpStream>>) -> Self {
@@ -28,5 +32,9 @@ impl MessageStream {
             }
         }
         Ok(None)
+    }
+
+    pub async fn next_json_with_timeout<T: DeserializeOwned>(&mut self, timeout: Duration) -> MaybeTimeout<Result<Option<T>>> {
+        tokio::time::timeout(timeout, async { self.next_json::<T>().await }).await
     }
 }
