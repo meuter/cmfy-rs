@@ -58,7 +58,7 @@ impl NodeField {
     }
 
     fn setter_ident(&self) -> Ident {
-        let name = format!("set_{}", self.ident().to_string());
+        let name = format!("set_{}", self.ident());
         Ident::new(name.as_str(), Span::mixed_site())
     }
 }

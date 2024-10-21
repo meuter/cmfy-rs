@@ -36,7 +36,7 @@ impl PromptProgressBars {
                 if let Some(image) = outputs.images().next() {
                     let url = self.client.url_for_image(image)?.to_string();
                     let status = format!("({})", status);
-                    bar.set_message(format!("{:<20} -> {}", status, url.to_string()));
+                    bar.set_message(format!("{:<20} -> {}", status, url));
                 }
                 bar.set_style(ProgressStyle::with_template(TEMPLATE_WITHOUT_STEPS)?);
                 bar.disable_steady_tick();
