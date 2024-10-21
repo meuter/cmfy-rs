@@ -1,5 +1,7 @@
 use std::fmt::{Display, Formatter};
 
+use colored::{ColoredString, Colorize};
+
 #[derive(Debug, Clone)]
 pub struct WithStatus<I, O> {
     pub inner: I,
@@ -32,6 +34,17 @@ impl<O> Display for Status<O> {
             Pending => write!(f, "pending"),
             Running => write!(f, "running"),
             Cancelled => write!(f, "cancelled"),
+        }
+    }
+}
+
+impl<O> Status<O> {
+    pub fn colored(&self) -> ColoredString {
+        match self {
+            Status::Completed(_) => self.to_string().green(),
+            Status::Pending => self.to_string().yellow(),
+            Status::Running => self.to_string().blue(),
+            Status::Cancelled => self.to_string().red(),
         }
     }
 }

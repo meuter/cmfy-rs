@@ -26,17 +26,17 @@ impl PromptProgressBars {
     }
 
     pub fn set_status(&mut self, prompt_id: impl AsRef<str>, status: Status<Outputs>) -> Result<()> {
-        const TEMPLATE_WITH_STEPS: &str = "{prefix} {msg} {pos:>3}/{len:3} [{elapsed_precise}]";
+        const TEMPLATE_WITH_STEPS: &str = "{prefix} {msg} -> steps: {pos:>2}/{len:2} [{elapsed_precise}]";
         const TEMPLATE_WITHOUT_STEPS: &str = "{prefix} {msg}";
 
         let bar = self.by_id.get_mut(prompt_id.as_ref()).expect("could not find prompt?");
-        bar.set_message(format!("{:<20}", format!("({})", status)));
+        bar.set_message(format!("{:<20}", format!("({})", status.colored())));
         match &status {
             Status::Completed(outputs) => {
                 if let Some(image) = outputs.images().next() {
                     let url = self.client.url_for_image(image)?.to_string();
-                    let status = format!("({})", status);
-                    bar.set_message(format!("{:<20} -> {}", status, url));
+                    let status = format!("({})", status.colored());
+                    bar.set_message(format!("{:<20} -> {}", status, url.cyan().underline()));
                 }
                 bar.set_style(ProgressStyle::with_template(TEMPLATE_WITHOUT_STEPS)?);
                 bar.disable_steady_tick();
@@ -45,17 +45,17 @@ impl PromptProgressBars {
             Status::Pending => {
                 bar.set_style(ProgressStyle::with_template(TEMPLATE_WITHOUT_STEPS)?);
                 bar.disable_steady_tick();
-                bar.set_message(format!("{:<20}", format!("({})", status)));
+                bar.set_message(format!("{:<20}", format!("({})", status.colored())));
             }
             Status::Running => {
                 bar.set_style(ProgressStyle::with_template(TEMPLATE_WITH_STEPS)?);
                 bar.enable_steady_tick(Duration::from_millis(100));
-                bar.set_message(format!("{:<20}", format!("({})", status)));
+                bar.set_message(format!("{:<20}", format!("({})", status.colored())));
             }
             Status::Cancelled => {
                 bar.disable_steady_tick();
                 bar.set_style(ProgressStyle::with_template(TEMPLATE_WITHOUT_STEPS)?);
-                bar.set_message(format!("{:<20}", format!("({})", status)));
+                bar.set_message(format!("{:<20}", format!("({})", status.colored())));
             }
         }
         Ok(())

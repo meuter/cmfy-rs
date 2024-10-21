@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 chrono = { version = "0.4.38", features = ["serde"] }
+colored = "2.1.0"
 futures-util = "0.3.31"
 http = "1.1.0"
 itertools = "0.13.0"
