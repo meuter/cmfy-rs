@@ -1,7 +1,7 @@
 use super::Run;
 use crate::io::{Input, JsonRead};
 use clap::Args;
-use cmfy::{Result, Client, dto};
+use cmfy::{dto, Client, Result};
 use cmfy_nodes::KSampler;
 use colored::Colorize;
 

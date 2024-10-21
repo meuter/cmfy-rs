@@ -12,7 +12,6 @@ pub struct LoraLoaderInputs {
     pub other: serde_json::Value,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, Node)]
 #[node(class_type = "KSampler")]
 pub struct KSamplerInputs {
@@ -26,7 +25,6 @@ pub struct KSamplerInputs {
     #[node_input(skip)]
     pub other: serde_json::Value,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, Node)]
 #[node(class_type = "EmptyLatentImage")]
@@ -42,4 +40,3 @@ pub struct ClipTextEncodeInput {
     pub text: String,
     pub clip: serde_json::Value,
 }
-
