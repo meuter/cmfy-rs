@@ -2,8 +2,9 @@ use super::Run;
 use crate::io::{Input, JsonRead};
 use clap::Args;
 use cmfy::{dto, Client, Result};
-use cmfy_nodes::KSampler;
+use cmfy_nodes::{EmptyLatentImage, KSampler};
 use colored::Colorize;
+use itertools::Itertools;
 
 /// Submits a batch of prompts to the server.
 ///
@@ -15,10 +16,20 @@ pub struct Submit {
     #[clap(default_value = "-")]
     input: Input,
 
-    /// Reseeds the prompts before submission
+    /// Reseeds the prompts at random before submission
     /// (assumes a KSampler node)
-    #[clap(long, short, action, default_value_t = false)]
+    #[clap(long, action, default_value_t = false)]
     reseed: bool,
+
+    /// Set the size of the prompts before submission
+    /// (assumes a EmptyLatentImage node)
+    #[clap(long, action, value_name = "WIDTHxHEIGHT(xBATCH)")]
+    size: Option<String>,
+
+    /// Sets the number of steps of the prompts before submission
+    /// (assumes a KSampler node)
+    #[clap(long, action)]
+    steps: Option<u8>,
 
     /// Allows to specify the number of times each prompt
     /// will be submitted.
@@ -32,6 +43,25 @@ impl Run for Submit {
         for mut prompt in prompts {
             if self.reseed {
                 prompt.set_seed(rand::random())?;
+            }
+            if let Some(size) = &self.size {
+                let split = size.split("x").collect_vec();
+                if split.len() != 2 && split.len() != 3 {
+                    Err(format!("size: could not parse '{}'", size))?;
+                }
+                if split.len() >= 2 {
+                    let width = split[0].parse()?;
+                    let height = split[1].parse()?;
+                    prompt.set_width(width)?;
+                    prompt.set_height(height)?;
+                }
+                if split.len() == 3 {
+                    let batch = split[2].parse()?;
+                    prompt.set_batch_size(batch)?;
+                }
+            }
+            if let Some(steps) = self.steps {
+                prompt.set_steps(steps)?;
             }
             for _ in 0..self.count {
                 let response = client.submit(&prompt).await?;
