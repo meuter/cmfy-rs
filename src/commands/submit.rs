@@ -41,9 +41,6 @@ impl Run for Submit {
     async fn run(mut self, client: Client) -> Result<()> {
         let prompts: Vec<dto::PromptNodes> = self.input.read_json()?;
         for mut prompt in prompts {
-            if self.reseed {
-                prompt.set_seed(rand::random())?;
-            }
             if let Some(size) = &self.size {
                 let split = size.split("x").collect_vec();
                 if split.len() != 2 && split.len() != 3 {
@@ -64,6 +61,9 @@ impl Run for Submit {
                 prompt.set_steps(steps)?;
             }
             for _ in 0..self.count {
+                if self.reseed {
+                    prompt.set_seed(rand::random())?;
+                }
                 let response = client.submit(&prompt).await?;
                 let index = format!("[{}]", response.number.to_string().bright_blue());
                 println!("{:<15}{}", index, response.prompt_id);
