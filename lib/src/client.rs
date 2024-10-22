@@ -32,11 +32,10 @@ impl Client {
         Ok(url)
     }
 
-    pub fn url_for_image(&self, image: &dto::Image) -> Result<Url> {
-        let params = serde_urlencoded::to_string(image)?;
+    pub fn url_for_image(&self, image: &dto::Image) -> Url {
+        let params = serde_urlencoded::to_string(image).unwrap();
         let address = format!("http://{}:{}/api/view?{}", self.hostname, self.port, params);
-        let url = Url::parse(address.as_str())?;
-        Ok(url)
+        Url::parse(address.as_str()).unwrap()
     }
 
     pub async fn get<R: DeserializeOwned>(&self, route: impl AsRef<str>) -> Result<R> {

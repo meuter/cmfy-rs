@@ -39,6 +39,19 @@ impl<O> Display for Status<O> {
 }
 
 impl<O> Status<O> {
+    pub fn map<U, F>(self, f: F) -> Status<U>
+    where
+        F: Fn(O) -> U,
+    {
+        use Status::*;
+        match self {
+            Completed(output) => Completed(f(output)),
+            Pending => Pending,
+            Running => Running,
+            Cancelled => Cancelled,
+        }
+    }
+
     pub fn colored(&self) -> ColoredString {
         match self {
             Status::Completed(_) => self.to_string().green(),

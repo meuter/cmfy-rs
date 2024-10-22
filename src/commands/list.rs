@@ -56,7 +56,7 @@ impl Run for List {
             if self.images {
                 if let Status::Completed(outputs) = entry.status {
                     if let Some(image) = outputs.images().next() {
-                        let url = client.url_for_image(image)?.to_string();
+                        let url = client.url_for_image(image).to_string();
                         print!(" -> {}", url.cyan().underline());
                     }
                 }

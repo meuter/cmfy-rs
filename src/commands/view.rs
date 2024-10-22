@@ -33,7 +33,7 @@ impl Run for View {
         let mut set = tokio::task::JoinSet::new();
         for entry in &entries {
             for image in entry.outputs.images() {
-                let url = client.url_for_image(image)?;
+                let url = client.url_for_image(image);
                 set.spawn(async move {
                     println!("{}", url);
                     open::that(url.to_string())

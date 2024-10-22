@@ -35,7 +35,7 @@ impl Run for Download {
         let mut set = tokio::task::JoinSet::new();
         for entry in &entries {
             for image in entry.outputs.images() {
-                let url = client.url_for_image(image)?;
+                let url = client.url_for_image(image);
                 let filename = image.filename.clone();
                 set.spawn(async move {
                     let response = reqwest::get(url.clone()).await?;

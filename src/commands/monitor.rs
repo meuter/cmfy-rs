@@ -1,10 +1,9 @@
 use super::Run;
 use clap::Args;
 use cmfy::{
-    dto::{websocket as ws, websocket::Message, Outputs},
+    dto::{websocket as ws, websocket::Message},
     Client, Prompt, Result, Status,
 };
-use cmfy_nodes::KSampler;
 use colored::Colorize;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use itertools::Itertools;
@@ -40,13 +39,32 @@ pub struct AllStatusProgressBars {
     pub by_id: HashMap<String, ProgressBar>,
 }
 
+struct AllStyles;
+
+impl AllStyles {
+    pub fn with_message() -> ProgressStyle {
+        let template = "{prefix} {msg}";
+        ProgressStyle::with_template(template).unwrap()
+    }
+    pub fn with_message_and_timing() -> ProgressStyle {
+        let template = "{prefix} {msg} -> [{elapsed_precise} < {duration_precise}]";
+        ProgressStyle::with_template(template).unwrap()
+    }
+    pub fn with_message_steps_and_timing() -> ProgressStyle {
+        let template = "{prefix} {msg} -> {pos:>2}/{len:2} [{elapsed_precise} < {duration_precise}]";
+        ProgressStyle::with_template(template).unwrap()
+    }
+}
+
 impl AllStatusProgressBars {
     pub async fn dispatch_message(&mut self, client: &Client, message: ws::Message) -> Result<()> {
         match message {
             Message::Status(_) => self.refresh(client).await,
             Message::Progress(contents) => {
                 let bar = self.get_progress_bar(&contents.data.prompt_id).unwrap();
-                bar.set_progress(contents.data.value)
+                bar.set_style(AllStyles::with_message_steps_and_timing());
+                bar.set_position(contents.data.value as u64);
+                Ok(())
             }
             _ => Ok(()),
         }
@@ -55,17 +73,6 @@ impl AllStatusProgressBars {
     pub async fn refresh(&mut self, client: &Client) -> Result<()> {
         let entries = client.collect_prompt_batch(true, true).await?;
 
-        for entry in &entries {
-            // TODO: avoid duplication of set_status
-            if let Some(bar) = self.get_progress_bar(&entry.inner.uuid) {
-                bar.set_status(client, entry.status.clone())?;
-            } else {
-                let bar = self.create_progress_bar(&entry.inner)?;
-                bar.set_status(client, entry.status.clone())?;
-            }
-        }
-
-        // NOTE: the bar for prompts that are not in the batch anymore should be removed
         let to_remove = self
             .by_id
             .keys()
@@ -79,70 +86,46 @@ impl AllStatusProgressBars {
             self.multi.remove(&bar);
         }
 
-        Ok(())
-    }
+        for entry in entries {
+            let bar = self.get_progress_bar(&entry.inner.uuid).unwrap_or_else(|| {
+                let prompt: &Prompt = &entry.inner;
+                let bar = self.multi.add(ProgressBar::new(0));
+                let index = format!("[{}]", prompt.index.to_string().bright_blue());
+                bar.set_prefix(format!("{:<15}{}", index, prompt.uuid));
+                self.by_id.insert(prompt.uuid.clone(), bar.clone());
+                bar
+            });
 
-    pub fn create_progress_bar(&mut self, prompt: &Prompt) -> Result<ProgressBar> {
-        let steps = prompt.nodes.steps()?;
-        let bar = self.multi.add(ProgressBar::new(steps as u64));
-        let index = format!("[{}]", prompt.index.to_string().bright_blue());
-        bar.set_prefix(format!("{:<15}{}", index, prompt.uuid));
-        self.by_id.insert(prompt.uuid.clone(), bar.clone());
-        Ok(bar)
+            let colored_status = format!("({})", entry.status.colored());
+            match &entry.status {
+                Status::Completed(outputs) => {
+                    bar.set_style(AllStyles::with_message());
+                    bar.disable_steady_tick();
+                    if let Some(image) = outputs.images().next() {
+                        let url = client.url_for_image(image);
+                        bar.set_message(format!("{:<20} -> {}", colored_status, url.to_string().cyan().underline()));
+                    } else {
+                        bar.set_message(format!("{:<20}", colored_status));
+                    }
+                    bar.finish();
+                }
+                Status::Pending | Status::Cancelled => {
+                    bar.set_style(AllStyles::with_message());
+                    bar.disable_steady_tick();
+                    bar.set_message(format!("{:<20}", colored_status));
+                }
+                Status::Running => {
+                    bar.set_style(AllStyles::with_message_and_timing());
+                    bar.enable_steady_tick(Duration::from_millis(100));
+                    bar.set_message(format!("{:<20}", colored_status));
+                }
+            };
+        }
+
+        Ok(())
     }
 
     pub fn get_progress_bar(&self, prompt_id: impl AsRef<str>) -> Option<ProgressBar> {
         self.by_id.get(prompt_id.as_ref()).cloned()
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// StatusProgressBar
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-trait StatusProgressBar {
-    // TODO: don't display the steps unless we have progress information to report
-    const TEMPLATE_WITH_STEPS: &str = "{prefix} {msg} -> steps: {pos:>2}/{len:2} [{elapsed_precise} < {duration_precise}]";
-    const TEMPLATE_WITHOUT_STEPS: &str = "{prefix} {msg}";
-    const TEMPLATE_RUNNING_WO_STEPS: &str = "{prefix} {msg} -> [{elapsed_precise} < {duration_precise}]";
-    const TEMPLATE_RUNNING_WITH_STEPS: &str = "{prefix} {msg} -> {pos:>2}/{len:2} [{elapsed_precise} < {duration_precise}]";
-
-    fn set_progress(&self, position: usize) -> Result<()>;
-    fn set_status(&self, client: &Client, status: Status<Outputs>) -> Result<()>;
-}
-
-impl StatusProgressBar for ProgressBar {
-    fn set_progress(&self, position: usize) -> Result<()> {
-        let style = ProgressStyle::with_template(Self::TEMPLATE_RUNNING_WITH_STEPS)?;
-        self.set_style(style);
-        self.set_position(position as u64);
-        Ok(())
-    }
-
-    fn set_status(&self, client: &Client, status: Status<Outputs>) -> Result<()> {
-        self.set_message(format!("{:<20}", format!("({})", status.colored())));
-        match &status {
-            Status::Completed(outputs) => {
-                if let Some(image) = outputs.images().next() {
-                    let url = client.url_for_image(image)?.to_string();
-                    let status = format!("({})", status.colored());
-                    self.set_message(format!("{:<20} -> {}", status, url.cyan().underline()));
-                }
-                self.set_style(ProgressStyle::with_template(Self::TEMPLATE_WITHOUT_STEPS)?);
-                self.disable_steady_tick();
-                self.finish();
-            }
-            Status::Pending | Status::Cancelled => {
-                self.set_style(ProgressStyle::with_template(Self::TEMPLATE_WITHOUT_STEPS)?);
-                self.disable_steady_tick();
-                self.set_message(format!("{:<20}", format!("({})", status.colored())));
-            }
-            Status::Running => {
-                self.set_style(ProgressStyle::with_template(Self::TEMPLATE_RUNNING_WO_STEPS)?);
-                self.enable_steady_tick(Duration::from_millis(100));
-                self.set_message(format!("{:<20}", format!("({})", status.colored())));
-            }
-        }
-        Ok(())
     }
 }
