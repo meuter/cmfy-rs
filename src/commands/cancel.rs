@@ -9,7 +9,6 @@ pub struct Cancel;
 
 impl Run for Cancel {
     async fn run(self, client: Client) -> Result<()> {
-        client.cancel_running_prompt().await?;
-        Ok(())
+        client.cancel_running_prompt().await
     }
 }

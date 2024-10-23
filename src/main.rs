@@ -56,16 +56,11 @@ enum Command {
     Capture(Capture),
     Submit(Submit),
     View(View),
-    // TODO: we have get and a listen command, migth be interesting to
-    //       have a post command.
     Get(Get),
     Listen(Listen),
     Extract(Extract),
     Monitor(Monitor),
     Download(Download),
-    // TODO: see if there is way with clap to have a catchall command
-    //       that we could use to invoke external binaries, cmfy-xxx,
-    //       similar to git.
 }
 
 fn compute_own_client_id() -> String {

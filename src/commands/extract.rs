@@ -3,8 +3,7 @@ use crate::io::{Input, JsonWrite, Output};
 use clap::Args;
 use cmfy::{dto::PromptNodes, Client, Result};
 
-/// Extracts prompt information from a PNG generated
-/// with Comfy UI, and outputs it as JSON.
+/// Extracts prompt from a PNG and outputs it as JSON.
 #[derive(Debug, Args)]
 pub struct Extract {
     /// Input file containing the prompts in json format
@@ -31,7 +30,6 @@ impl Run for Extract {
             .filter_map(|chunk| if chunk.keyword == "prompt" { Some(&chunk.text) } else { None })
             .next()
             .ok_or("could not find prompt in PNG".to_string())?;
-        // self.output.write_json(value, pretty)
         let prompt = serde_json::from_str::<PromptNodes>(json)?;
         let prompts = [prompt];
 

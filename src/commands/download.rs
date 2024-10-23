@@ -4,8 +4,6 @@ use cmfy::{Client, Result};
 use itertools::Itertools;
 use std::io::Cursor;
 
-// TODO: use indicatif to make progress bar? is that necessary?
-
 /// Download images from completed prompts locally
 #[derive(Debug, Args)]
 pub struct Download {

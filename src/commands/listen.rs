@@ -3,8 +3,7 @@ use crate::io::{JsonWrite, Output};
 use clap::Args;
 use cmfy::{Client, Result};
 
-/// Opens a websocket connection to the server, listens for messages
-/// and displays them as JSON on the console.
+/// Displays JSON websocket messages from server
 #[derive(Debug, Clone, Args)]
 pub struct Listen {
     /// Pretty prints the JSON output

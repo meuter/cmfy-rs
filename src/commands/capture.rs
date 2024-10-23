@@ -4,11 +4,11 @@ use clap::Args;
 use clio::Output;
 use itertools::Itertools;
 
-/// Capture running and pending prompt to file.
+/// Capture prompts from history and/or queue to file.
 ///
 /// Retrieves the running and pending prompts from
 /// the server and saves them as json. These prompts
-/// can then be re-queues using the 'submit' command.#[derive(Debug, Args)]
+/// can then be re-queues using the 'submit' command.
 #[derive(Debug, Args)]
 pub struct Capture {
     /// Capture all prompts from queue (running and pending)
