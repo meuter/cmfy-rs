@@ -1,6 +1,6 @@
 [package]
 name = "cmfy-nodes"
-version = "0.3.0-wip"
+version = "0.5.0-wip"
 edition = "2021"
 authors = ["Cédric Meuter <cedric.meuter@gmail.com>"]
 description = "A CLI companion app for Comfy UI"
@@ -11,7 +11,7 @@ homepage = "https://github.com/meuter/cmfy-rs"
 repository = "https://github.com/meuter/cmfy-rs"
 
 [dependencies]
-cmfy = { version = "0.3.0-wip", path = "../lib" }
-cmfy-macros = { version = "0.3.0-wip", path = "../macros" }
+cmfy = { version = "0.5.0-wip", path = "../lib" }
+cmfy-macros = { version = "0.5.0-wip", path = "../macros" }
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.132"

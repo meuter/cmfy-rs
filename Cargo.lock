@@ -231,7 +231,7 @@ dependencies = [
 
 [[package]]
 name = "cmfy"
-version = "0.3.0-wip"
+version = "0.5.0-wip"
 dependencies = [
  "chrono",
  "colored",
@@ -249,7 +249,7 @@ dependencies = [
 
 [[package]]
 name = "cmfy-cli"
-version = "0.3.0-wip"
+version = "0.5.0-wip"
 dependencies = [
  "clap",
  "clio",
@@ -275,7 +275,7 @@ dependencies = [
 
 [[package]]
 name = "cmfy-macros"
-version = "0.3.0-wip"
+version = "0.5.0-wip"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -285,7 +285,7 @@ dependencies = [
 
 [[package]]
 name = "cmfy-nodes"
-version = "0.3.0-wip"
+version = "0.5.0-wip"
 dependencies = [
  "cmfy",
  "cmfy-macros",
