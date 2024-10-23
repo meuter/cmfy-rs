@@ -2,6 +2,13 @@
 name = "cmfy"
 version = "0.3.0-wip"
 edition = "2021"
+authors = ["Cédric Meuter <cedric.meuter@gmail.com>"]
+description = "A CLI companion app for Comfy UI"
+readme = "../README.md"
+license = "MIT"
+keywords = ["comfy", "comfyui", "comfy-ui"]
+homepage = "https://github.com/meuter/cmfy-rs"
+repository = "https://github.com/meuter/cmfy-rs"
 
 [dependencies]
 chrono = { version = "0.4.38", features = ["serde"] }
@@ -15,4 +22,4 @@ serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.132"
 serde_urlencoded = "0.7.1"
 tokio = "1.40.0"
-tokio-websockets = { version = "0.10.1", features = ["client", "native-tls", "rand", "ring"] }
+tokio-websockets = { version = "0.10.1", features = [ "client", "native-tls", "rand", "ring" ] }
