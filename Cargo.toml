@@ -1,6 +1,6 @@
 [package]
 name = "cmfy-cli"
-version = "0.3.0-wip"
+version = "0.4.0"
 edition = "2021"
 authors = ["Cédric Meuter <cedric.meuter@gmail.com>"]
 description = "A CLI companion app for Comfy UI"
@@ -20,8 +20,8 @@ members = ["nodes", "macros", "lib"]
 [dependencies]
 clap = { version = "4.5.20", features = ["derive", "env"] }
 clio = { version = "0.3.5", features = ["clap", "clap-parse"] }
-cmfy = { version = "0.3.0-wip", path = "lib" }
-cmfy-nodes = { version = "0.3.0-wip", path = "nodes" }
+cmfy = { version = "0.4.0", path = "lib" }
+cmfy-nodes = { version = "0.4.0", path = "nodes" }
 colored = "2.1.0"
 enum_dispatch = "0.3.13"
 humansize = "2.1.3"
