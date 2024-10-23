@@ -8,11 +8,44 @@
 
 A CLI companion app for Comfy UI
 
+## Installation
+
+<details>
+<summary>crates.io</summary>
+
+- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
+- Install `cmfy-cli`:
+  ```
+  cargo install cmfy-cli
+  ```
+
+</details>
+
+<details>
+<summary>git</summary>
+
+- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
+- Install `cmfy`:
+  ```
+  cd cmfy
+  cargo install --git https://github.com/meuter/cmfy-rs
+  ```
+
+</details>
+
+<details>
+<summary>precompiled binaries</summary>
+
+- Download the prebuilt binaries from the [release](https://github.com/meuter/cmfy-rs/releases/latest) page.
+- Save it somewhere in your path (don't format to `chmod +x` on Linux or MacOS)
+
+</details>
+
 ## Usage
 
 `cmfy` provides several commands:
 
-```
+```txt
 Usage: cmfy [OPTIONS] <COMMAND>
 
 Commands:
@@ -41,33 +74,4 @@ Options:
   -h, --help                   Print help
   -V, --version                Print version
 ```
-
-## Installation
-
-### From crates.io
-
-- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
-- Install `cmfy-cli`:
-  ```
-  cargo install cmfy-cli
-  ```
-
-### From source
-
-- Install rust as per [these instructions](https://www.rust-lang.org/tools/install)
-- Clone the repo:
-  ```
-  git clone https://github.com/meuter/cmfy
-  ```
-- Install `cmfy`:
-  ```
-  cd cmfy
-  cargo install --path .
-  ```
-
-### From Github Release
-
-- Download the prebuilt binaries from the [release](https://github.com/meuter/cmfy-rs/releases) page.
-
-
 
