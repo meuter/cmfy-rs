@@ -2,7 +2,7 @@ use super::{List, Run};
 use clap::Args;
 use cmfy::Client;
 
-/// Manipulates history of prompts
+/// Lists and optionally clear history of prompts
 #[derive(Debug, Args)]
 pub struct History {
     /// Lists all prompt from history
