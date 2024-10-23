@@ -9,6 +9,7 @@ use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use std::{collections::HashMap, time::Duration};
 
+/// Monitors the progress on ongoing prompts.
 #[derive(Debug, Clone, Args)]
 pub struct Monitor;
 
