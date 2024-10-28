@@ -6,6 +6,7 @@ use colored::Colorize;
 
 /// List all prompts from history and queue
 #[derive(Debug, Args, Default)]
+#[clap(alias = "ls")]
 pub struct List {
     /// Display prompts from history
     #[clap(short = 's', long, action, default_value_t = false)]
