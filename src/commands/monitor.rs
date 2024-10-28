@@ -17,7 +17,7 @@ impl Run for Monitor {
     async fn run(self, client: Client) -> Result<()> {
         let mut stream = client.listen().await?;
         let mut bars = AllStatusProgressBars::default();
-        let timeout = Duration::from_millis(500);
+        let timeout = Duration::from_secs(1);
 
         loop {
             match stream.next_json_with_timeout(timeout).await {
@@ -59,13 +59,20 @@ impl AllStyles {
 
 impl AllStatusProgressBars {
     pub async fn dispatch_message(&mut self, client: &Client, message: ws::Message) -> Result<()> {
+        use Message::*;
         match message {
-            Message::Status(_) => self.refresh(client).await,
-            Message::Progress(contents) => {
+            Status(_) => self.refresh(client).await,
+            Progress(contents) => {
                 let bar = self.get_progress_bar(&contents.data.prompt_id).unwrap();
                 bar.set_style(AllStyles::with_message_steps_and_timing());
                 bar.set_length(contents.data.max as u64);
                 bar.set_position(contents.data.value as u64);
+                Ok(())
+            }
+            ExecutionStart(contents) => {
+                let bar = self.get_progress_bar(&contents.data.prompt_id).unwrap();
+                bar.reset_elapsed();
+                bar.reset_eta();
                 Ok(())
             }
             _ => Ok(()),
