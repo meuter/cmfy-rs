@@ -64,6 +64,7 @@ impl AllStatusProgressBars {
             Message::Progress(contents) => {
                 let bar = self.get_progress_bar(&contents.data.prompt_id).unwrap();
                 bar.set_style(AllStyles::with_message_steps_and_timing());
+                bar.set_length(contents.data.max as u64);
                 bar.set_position(contents.data.value as u64);
                 Ok(())
             }
@@ -116,7 +117,11 @@ impl AllStatusProgressBars {
                     bar.set_message(format!("{:<20}", colored_status));
                 }
                 Status::Running => {
-                    bar.set_style(AllStyles::with_message_and_timing());
+                    if bar.length().is_some() {
+                        bar.set_style(AllStyles::with_message_steps_and_timing());
+                    } else {
+                        bar.set_style(AllStyles::with_message_and_timing());
+                    }
                     bar.enable_steady_tick(Duration::from_millis(100));
                     bar.set_message(format!("{:<20}", colored_status));
                 }
