@@ -75,7 +75,7 @@ pub struct MessageData {
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(transparent)]
-pub struct Meta(pub BTreeMap<u32, Metadata>);
+pub struct Meta(pub BTreeMap<String, Metadata>);
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Metadata {
