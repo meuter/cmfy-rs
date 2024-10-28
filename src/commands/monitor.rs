@@ -129,7 +129,7 @@ impl AllStatusProgressBars {
                     } else {
                         bar.set_style(AllStyles::with_message_and_timing());
                     }
-                    bar.enable_steady_tick(Duration::from_millis(100));
+                    bar.enable_steady_tick(Duration::from_secs(1));
                     bar.set_message(format!("{:<20}", colored_status));
                 }
             };
