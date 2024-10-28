@@ -73,9 +73,16 @@ pub struct MessageData {
     pub other: BTreeMap<String, serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Deserialize, Eq, PartialEq, PartialOrd, Ord)]
+#[serde(untagged)]
+pub enum StringOrNumber {
+    String(String),
+    Number(u32),
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(transparent)]
-pub struct Meta(pub BTreeMap<String, Metadata>);
+pub struct Meta(pub BTreeMap<StringOrNumber, Metadata>);
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Metadata {
