@@ -52,7 +52,7 @@ impl Run for List {
 
         for entry in client.collect_prompt_batch(self.history, self.queue).await? {
             let prompt = entry.inner;
-            let index = format!("[{}]", prompt.index.to_string().bright_blue());
+            let index = format!("[{}] ", prompt.index.to_string().bright_blue());
             print!("{:<15}{} ({})", index, prompt.uuid, entry.status.colored());
             if self.images {
                 if let Status::Completed(outputs) = entry.status {

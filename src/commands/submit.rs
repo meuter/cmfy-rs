@@ -65,7 +65,7 @@ impl Run for Submit {
                     prompt.set_seed(rand::random())?;
                 }
                 let response = client.submit(&prompt).await?;
-                let index = format!("[{}]", response.number.to_string().bright_blue());
+                let index = format!("[{}] ", response.number.to_string().bright_blue());
                 println!("{:<15}{}", index, response.prompt_id);
             }
         }

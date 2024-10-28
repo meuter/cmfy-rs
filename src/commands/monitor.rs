@@ -99,7 +99,7 @@ impl AllStatusProgressBars {
             let bar = self.get_progress_bar(&entry.inner.uuid).unwrap_or_else(|| {
                 let prompt: &Prompt = &entry.inner;
                 let bar = self.multi.add(ProgressBar::new(0));
-                let index = format!("[{}]", prompt.index.to_string().bright_blue());
+                let index = format!("[{}] ", prompt.index.to_string().bright_blue());
                 bar.set_prefix(format!("{:<15}{}", index, prompt.uuid));
                 self.by_id.insert(prompt.uuid.clone(), bar.clone());
                 bar
