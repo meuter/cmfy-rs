@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Prompt {
-    pub index: u64,
+    pub index: i64,
     pub uuid: String,
     pub nodes: PromptNodes,
     pub png_info: serde_json::Value,
@@ -23,7 +23,7 @@ pub struct Node<I> {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct SubmitResponse {
-    pub number: u32,
+    pub number: i32,
     pub prompt_id: String,
     pub node_errors: serde_json::Value,
 }

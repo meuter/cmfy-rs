@@ -21,7 +21,7 @@ impl Run for Download {
     async fn run(self, client: Client) -> Result<()> {
         let history = client.history().await?;
         let entries = if let Some(range) = self.range {
-            let range: Vec<u64> = range_parser::parse(&range)?;
+            let range: Vec<i64> = range_parser::parse(&range)?;
             history
                 .into_iter()
                 .filter(|entry| range.contains(&entry.prompt.index))
