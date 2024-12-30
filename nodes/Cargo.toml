@@ -13,5 +13,5 @@ repository = "https://github.com/meuter/cmfy-rs"
 [dependencies]
 cmfy = { version = "0.5.0-wip", path = "../lib" }
 cmfy-macros = { version = "0.5.0-wip", path = "../macros" }
-serde = { version = "1.0.216", features = ["derive"] }
+serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.134"
