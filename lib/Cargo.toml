@@ -15,7 +15,7 @@ chrono = { version = "0.4.39", features = ["serde"] }
 colored = "2.2.0"
 futures-util = "0.3.31"
 http = "1.2.0"
-itertools = "0.13.0"
+itertools = "0.14.0"
 rand = "0.8.5"
 reqwest = "0.12.12"
 serde = { version = "1.0.217", features = ["derive"] }
