@@ -86,7 +86,7 @@ impl Client {
         self.clear("history").await
     }
 
-    pub async fn delete_from_history<'a>(&self, prompt_id: impl AsRef<str>) -> Result<()> {
+    pub async fn delete_from_history(&self, prompt_id: impl AsRef<str>) -> Result<()> {
         let delete = vec![prompt_id.as_ref()];
         let payload = serde_json::json!({"delete": delete});
         let response: Option<()> = self.post("history", &payload).await?;
