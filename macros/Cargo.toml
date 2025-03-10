@@ -13,7 +13,7 @@ repository = "https://github.com/meuter/cmfy-rs"
 [dependencies]
 darling = "0.20.10"
 proc-macro2 = "1.0.93"
-quote = "1.0.38"
+quote = "1.0.39"
 syn = "2.0.98"
 
 [lib]
