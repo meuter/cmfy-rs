@@ -14,7 +14,7 @@ repository = "https://github.com/meuter/cmfy-rs"
 chrono = { version = "0.4.40", features = ["serde"] }
 colored = "3.0.0"
 futures-util = "0.3.31"
-http = "1.2.0"
+http = "1.3.1"
 itertools = "0.14.0"
 rand = "0.9.0"
 reqwest = "0.12.12"
