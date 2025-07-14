@@ -1254,7 +1254,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c9cc1d47e243d655ace55ed38201c19ae02c148ae56412ab8750e8f0166ab7f"
 dependencies = [
  "once_cell",
- "ring",
  "rustls-pki-types",
  "rustls-webpki",
  "subtle",
@@ -1584,9 +1583,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-websockets"
-version = "0.11.4"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fcaf159b4e7a376b05b5bfd77bfd38f3324f5fce751b4213bfc7eaa47affb4e"
+checksum = "3f29ba084eb43becc9864ba514b4a64f5f65b82f9a6ffbafa5436c1c80605f03"
 dependencies = [
  "base64",
  "bytes",
@@ -1599,7 +1598,6 @@ dependencies = [
  "simdutf8",
  "tokio",
  "tokio-native-tls",
- "tokio-rustls",
  "tokio-util",
 ]
 
