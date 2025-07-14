@@ -35,12 +35,15 @@ impl Run for View {
             for image in entry.outputs.images() {
                 let url = client.url_for_image(image);
                 set.spawn(async move {
-                    println!("{}", url);
+                    println!("{url}");
                     open::that(url.to_string())
                 });
             }
         }
-        set.join_all().await.into_iter().collect::<std::io::Result<Vec<_>>>()?;
+        set.join_all()
+            .await
+            .into_iter()
+            .collect::<std::io::Result<Vec<_>>>()?;
 
         if self.clear {
             for entry in &entries {

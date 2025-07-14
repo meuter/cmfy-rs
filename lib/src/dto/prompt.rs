@@ -41,7 +41,10 @@ impl PromptNodes {
     }
 
     pub fn take<N: ClassType + DeserializeOwned>(&mut self, id: String) -> Result<N> {
-        let node = self.0.remove(&id).ok_or(format!("node id '{}' not found", id))?;
+        let node = self
+            .0
+            .remove(&id)
+            .ok_or(format!("node id '{id}' not found"))?;
         Ok(serde_json::from_value(node.inputs)?)
     }
 

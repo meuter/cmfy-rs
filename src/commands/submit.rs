@@ -44,7 +44,7 @@ impl Run for Submit {
             if let Some(size) = &self.size {
                 let split = size.split("x").collect_vec();
                 if split.len() != 2 && split.len() != 3 {
-                    Err(format!("size: could not parse '{}'", size))?;
+                    Err(format!("size: could not parse '{size}'"))?;
                 }
                 if split.len() >= 2 {
                     let width = split[0].parse()?;

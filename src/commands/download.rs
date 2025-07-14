@@ -40,12 +40,15 @@ impl Run for Download {
                     let mut file = std::fs::File::create(&filename)?;
                     let mut content = Cursor::new(response.bytes().await?);
                     std::io::copy(&mut content, &mut file)?;
-                    println!("{} -> {}", url, filename);
+                    println!("{url} -> {filename}");
                     Ok(())
                 });
             }
         }
-        set.join_all().await.into_iter().collect::<Result<Vec<_>>>()?;
+        set.join_all()
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>>>()?;
 
         if self.clear {
             for entry in &entries {

@@ -52,7 +52,8 @@ impl AllStyles {
         ProgressStyle::with_template(template).unwrap()
     }
     pub fn with_message_steps_and_timing() -> ProgressStyle {
-        let template = "{prefix} {msg} -> {pos:>2}/{len:2} [{elapsed_precise} < {duration_precise}]";
+        let template =
+            "{prefix} {msg} -> {pos:>2}/{len:2} [{elapsed_precise} < {duration_precise}]";
         ProgressStyle::with_template(template).unwrap()
     }
 }
@@ -112,16 +113,20 @@ impl AllStatusProgressBars {
                     bar.disable_steady_tick();
                     if let Some(image) = outputs.images().next() {
                         let url = client.url_for_image(image);
-                        bar.set_message(format!("{:<20} -> {}", colored_status, url.to_string().cyan().underline()));
+                        bar.set_message(format!(
+                            "{:<20} -> {}",
+                            colored_status,
+                            url.to_string().cyan().underline()
+                        ));
                     } else {
-                        bar.set_message(format!("{:<20}", colored_status));
+                        bar.set_message(format!("{colored_status:<20}"));
                     }
                     bar.finish();
                 }
                 Status::Pending | Status::Cancelled => {
                     bar.set_style(AllStyles::with_message());
                     bar.disable_steady_tick();
-                    bar.set_message(format!("{:<20}", colored_status));
+                    bar.set_message(format!("{colored_status:<20}"));
                 }
                 Status::Running => {
                     if bar.length().is_some() {
@@ -130,7 +135,7 @@ impl AllStatusProgressBars {
                         bar.set_style(AllStyles::with_message_and_timing());
                     }
                     bar.enable_steady_tick(Duration::from_secs(1));
-                    bar.set_message(format!("{:<20}", colored_status));
+                    bar.set_message(format!("{colored_status:<20}"));
                 }
             };
         }
