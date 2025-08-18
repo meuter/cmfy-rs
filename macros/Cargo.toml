@@ -11,7 +11,7 @@ homepage = "https://github.com/meuter/cmfy-rs"
 repository = "https://github.com/meuter/cmfy-rs"
 
 [dependencies]
-darling = "0.21.1"
+darling = "0.21.2"
 proc-macro2 = "1.0.96"
 quote = "1.0.40"
 syn = "2.0.104"
