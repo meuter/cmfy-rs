@@ -21,13 +21,20 @@ pub struct Extract {
 
 impl Run for Extract {
     async fn run(mut self, _: Client) -> Result<()> {
-        let decoder = png::Decoder::new(self.input);
+        let input = seek_bufread::BufReader::new(self.input);
+        let decoder = png::Decoder::new(input);
         let reader = decoder.read_info()?;
         let json = reader
             .info()
             .uncompressed_latin1_text
             .iter()
-            .filter_map(|chunk| if chunk.keyword == "prompt" { Some(&chunk.text) } else { None })
+            .filter_map(|chunk| {
+                if chunk.keyword == "prompt" {
+                    Some(&chunk.text)
+                } else {
+                    None
+                }
+            })
             .next()
             .ok_or("could not find prompt in PNG".to_string())?;
         let prompt = serde_json::from_str::<PromptNodes>(json)?;
