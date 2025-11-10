@@ -14,7 +14,7 @@ repository = "https://github.com/meuter/cmfy-rs"
 darling = "0.21.3"
 proc-macro2 = "1.0.103"
 quote = "1.0.41"
-syn = "2.0.108"
+syn = "2.0.109"
 
 [lib]
 path = "src/lib.rs"
