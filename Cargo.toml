@@ -32,7 +32,7 @@ open = "5.3.3"
 png = "0.18.0"
 rand = "0.9.2"
 range-parser = "0.1.2"
-reqwest = "0.12.24"
+reqwest = "0.12.25"
 ring = "0.17.14"
 seek_bufread = "1.2.2"
 serde = { version = "1.0.228", features = ["derive"] }
