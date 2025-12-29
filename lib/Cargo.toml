@@ -22,4 +22,4 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 serde_urlencoded = "0.7.1"
 tokio = "1.48.0"
-tokio-websockets = { version = "0.13.0", features = [ "client", "native-tls", "rand", "ring" ] }
+tokio-websockets = { version = "0.13.1", features = [ "client", "native-tls", "rand", "ring" ] }
