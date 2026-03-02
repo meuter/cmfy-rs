@@ -11,7 +11,7 @@ homepage = "https://github.com/meuter/cmfy-rs"
 repository = "https://github.com/meuter/cmfy-rs"
 
 [dependencies]
-chrono = { version = "0.4.43", features = ["serde"] }
+chrono = { version = "0.4.44", features = ["serde"] }
 colored = "3.1.1"
 futures-util = "0.3.32"
 http = "1.4.0"
