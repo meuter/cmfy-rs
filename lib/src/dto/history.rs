@@ -112,10 +112,17 @@ impl IntoIterator for History {
 
 impl From<HistoryLogEntry> for PromptBatchEntry {
     fn from(entry: HistoryLogEntry) -> Self {
-        if entry.status.messages.iter().any(|msg| msg.kind == MessageKind::Interruped) {
+        if entry
+            .status
+            .messages
+            .iter()
+            .any(|msg| msg.kind == MessageKind::Interruped)
+        {
             entry.prompt.mark_as(crate::Status::Cancelled)
         } else {
-            entry.prompt.mark_as(crate::Status::Completed(entry.outputs))
+            entry
+                .prompt
+                .mark_as(crate::Status::Completed(entry.outputs))
         }
     }
 }
@@ -123,7 +130,7 @@ impl From<HistoryLogEntry> for PromptBatchEntry {
 impl From<History> for PromptBatch {
     fn from(history: History) -> Self {
         let mut result = history.into_batch_entries().collect_vec();
-        result.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
+        result.sort_by_key(|l| l.inner.index);
         result
     }
 }

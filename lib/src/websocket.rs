@@ -20,7 +20,9 @@ impl MessageStream {
 
     pub async fn open(address: impl AsRef<str>) -> Result<Self> {
         let uri = address.as_ref().parse::<Uri>()?;
-        let (stream, _) = tokio_websockets::ClientBuilder::from_uri(uri).connect().await?;
+        let (stream, _) = tokio_websockets::ClientBuilder::from_uri(uri)
+            .connect()
+            .await?;
         Ok(MessageStream::new(stream))
     }
 
@@ -34,7 +36,10 @@ impl MessageStream {
         Ok(None)
     }
 
-    pub async fn next_json_with_timeout<T: DeserializeOwned>(&mut self, timeout: Duration) -> MaybeTimeout<Result<Option<T>>> {
+    pub async fn next_json_with_timeout<T: DeserializeOwned>(
+        &mut self,
+        timeout: Duration,
+    ) -> MaybeTimeout<Result<Option<T>>> {
         tokio::time::timeout(timeout, async { self.next_json::<T>().await }).await
     }
 }

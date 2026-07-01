@@ -46,7 +46,11 @@ impl Client {
         Ok(parsed)
     }
 
-    pub async fn post<R: DeserializeOwned>(&self, route: impl AsRef<str>, payload: &impl Serialize) -> Result<Option<R>> {
+    pub async fn post<R: DeserializeOwned>(
+        &self,
+        route: impl AsRef<str>,
+        payload: &impl Serialize,
+    ) -> Result<Option<R>> {
         let url = format!("http://{}:{}/{}", self.hostname, self.port, route.as_ref());
         let body = serde_json::to_string(payload)?;
         let response = self.client.post(url).body(body).send().await?;
@@ -121,12 +125,15 @@ impl Client {
             let queue = self.queue().await?;
             batch.extend(queue.into_batch_entries())
         }
-        batch.sort_by(|l, r| l.inner.index.cmp(&r.inner.index));
+        batch.sort_by_key(|l| l.inner.index);
         Ok(batch)
     }
 
     pub async fn listen(&self) -> Result<MessageStream> {
-        let address = format!("ws://{}:{}/ws?clientId={}", self.hostname, self.port, self.id);
+        let address = format!(
+            "ws://{}:{}/ws?clientId={}",
+            self.hostname, self.port, self.id
+        );
         MessageStream::open(address).await
     }
 }

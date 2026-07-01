@@ -28,7 +28,11 @@ impl Run for Stats {
                 .split_whitespace()
                 .next()
                 .expect("malfored python version"),
-            if stats.system.embedded_python { " (embedded)" } else { "" }
+            if stats.system.embedded_python {
+                " (embedded)"
+            } else {
+                ""
+            }
         );
         println!("        comfyui : {}", stats.system.comfyui_version);
         println!("        pytorch : {}", stats.system.pytorch_version);

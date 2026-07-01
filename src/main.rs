@@ -35,7 +35,13 @@ struct Cli {
     hostname: String,
 
     /// port of the server
-    #[arg(short, long, env = "COMFY_PORT", value_name = "PORT", default_value_t = 8188)]
+    #[arg(
+        short,
+        long,
+        env = "COMFY_PORT",
+        value_name = "PORT",
+        default_value_t = 8188
+    )]
     port: u32,
 
     /// command to execute

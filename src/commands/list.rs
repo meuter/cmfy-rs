@@ -50,7 +50,10 @@ impl Run for List {
             self.queue = true;
         }
 
-        for entry in client.collect_prompt_batch(self.history, self.queue).await? {
+        for entry in client
+            .collect_prompt_batch(self.history, self.queue)
+            .await?
+        {
             let prompt = entry.inner;
             let index = format!("[{}] ", prompt.index.to_string().bright_blue());
             print!("{:<15}{} ({})", index, prompt.uuid, entry.status.colored());
